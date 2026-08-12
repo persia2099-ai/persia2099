@@ -1,2 +1,954 @@
-# persia2099
-Persia 2099 — A cyberpunk universe inspired by Persian mythology.
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>PERSIA 2099 — Genesis Guardians</title>
+
+  <meta
+    name="description"
+    content="PERSIA 2099 — Genesis Guardians. A futuristic Persian universe where ancient legends awaken in the year 2099."
+  >
+
+  <style>
+
+    :root {
+      --black: #050505;
+      --dark: #090909;
+      --gold: #d6b15b;
+      --gold-light: #f0d58a;
+      --blue: #39bfff;
+      --white: #f4f4f4;
+      --gray: #929292;
+      --line: rgba(255,255,255,0.10);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--black);
+      color: var(--white);
+      font-family: Arial, Helvetica, sans-serif;
+      line-height: 1.6;
+      overflow-x: hidden;
+    }
+
+    a {
+      color: inherit;
+      text-decoration: none;
+    }
+
+    /* =========================
+       NAVIGATION
+    ========================= */
+
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 72px;
+      padding: 0 6%;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      background: rgba(5,5,5,0.82);
+      backdrop-filter: blur(18px);
+      border-bottom: 1px solid var(--line);
+      z-index: 1000;
+    }
+
+    .brand {
+      font-size: 19px;
+      font-weight: 900;
+      letter-spacing: 4px;
+      color: var(--gold);
+    }
+
+    .brand span {
+      display: block;
+      font-size: 8px;
+      letter-spacing: 3px;
+      color: #777;
+      margin-top: -2px;
+      text-align: center;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 30px;
+      font-size: 11px;
+      letter-spacing: 2px;
+    }
+
+    .nav-links a {
+      color: #aaa;
+      transition: .3s;
+    }
+
+    .nav-links a:hover {
+      color: var(--gold);
+    }
+
+    /* =========================
+       HERO
+    ========================= */
+
+    .hero {
+      min-height: 100vh;
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      padding: 120px 20px 80px;
+      overflow: hidden;
+
+      background:
+        radial-gradient(
+          circle at 50% 42%,
+          rgba(40,125,170,0.20),
+          transparent 25%
+        ),
+        radial-gradient(
+          circle at 50% 50%,
+          rgba(214,177,91,0.08),
+          transparent 45%
+        ),
+        linear-gradient(
+          180deg,
+          #030303 0%,
+          #080808 55%,
+          #050505 100%
+        );
+    }
+
+    .hero::before {
+      content: "";
+      position: absolute;
+      width: 620px;
+      height: 620px;
+      border: 1px solid rgba(214,177,91,0.14);
+      border-radius: 50%;
+      box-shadow:
+        0 0 100px rgba(30,140,200,0.08),
+        inset 0 0 100px rgba(214,177,91,0.04);
+      animation: ring 8s infinite ease-in-out;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 900px;
+      height: 1px;
+      background: linear-gradient(
+        90deg,
+        transparent,
+        rgba(214,177,91,0.4),
+        transparent
+      );
+      bottom: 17%;
+    }
+
+    .hero-content {
+      position: relative;
+      z-index: 2;
+      max-width: 900px;
+    }
+
+    .eyebrow {
+      color: var(--gold);
+      font-size: 11px;
+      letter-spacing: 7px;
+      margin-bottom: 25px;
+    }
+
+    .hero h1 {
+      font-size: clamp(58px, 13vw, 145px);
+      line-height: .86;
+      letter-spacing: 8px;
+      font-weight: 900;
+      text-shadow:
+        0 0 40px rgba(214,177,91,0.08);
+    }
+
+    .hero h2 {
+      margin-top: 28px;
+      color: var(--gold);
+      font-size: clamp(15px, 2.5vw, 25px);
+      font-weight: 400;
+      letter-spacing: 8px;
+    }
+
+    .hero-description {
+      max-width: 650px;
+      margin: 28px auto;
+      color: #999;
+      font-size: 15px;
+    }
+
+    .button {
+      display: inline-block;
+      padding: 14px 30px;
+      border: 1px solid var(--gold);
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 3px;
+      transition: .35s;
+    }
+
+    .button:hover {
+      background: var(--gold);
+      color: #050505;
+      box-shadow: 0 0 35px rgba(214,177,91,0.25);
+    }
+
+    /* =========================
+       GENERAL SECTIONS
+    ========================= */
+
+    section {
+      max-width: 1350px;
+      margin: auto;
+      padding: 115px 7%;
+    }
+
+    .section-heading {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    .section-heading span {
+      display: block;
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .section-heading h2 {
+      font-size: clamp(30px, 5vw, 48px);
+      letter-spacing: 4px;
+      font-weight: 800;
+    }
+
+    .section-heading p {
+      max-width: 650px;
+      margin: 18px auto 0;
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =========================
+       LORE
+    ========================= */
+
+    .lore {
+      max-width: 850px;
+      margin: auto;
+      text-align: center;
+      color: #999;
+      font-size: 16px;
+    }
+
+    .lore strong {
+      color: var(--gold);
+      font-weight: normal;
+    }
+
+    .lore-divider {
+      width: 80px;
+      height: 1px;
+      background: var(--gold);
+      margin: 35px auto;
+      opacity: .5;
+    }
+
+    /* =========================
+       CHARACTERS
+    ========================= */
+
+    .characters {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 22px;
+    }
+
+    .character {
+      position: relative;
+      min-height: 500px;
+      overflow: hidden;
+      background: #080808;
+      border: 1px solid rgba(255,255,255,0.09);
+      transition: .45s;
+    }
+
+    .character:hover {
+      transform: translateY(-8px);
+      border-color: rgba(214,177,91,0.55);
+      box-shadow:
+        0 20px 60px rgba(0,0,0,.6),
+        0 0 35px rgba(214,177,91,.07);
+    }
+
+    .character img {
+      width: 100%;
+      height: 100%;
+      min-height: 500px;
+      object-fit: cover;
+      display: block;
+      transition: .6s;
+    }
+
+    .character:hover img {
+      transform: scale(1.035);
+    }
+
+    .character-overlay {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 25px;
+      background:
+        linear-gradient(
+          to top,
+          rgba(0,0,0,.92) 0%,
+          rgba(0,0,0,.25) 45%,
+          transparent 75%
+        );
+    }
+
+    .character-number {
+      position: absolute;
+      top: 18px;
+      right: 18px;
+      font-size: 10px;
+      letter-spacing: 3px;
+      color: var(--gold-light);
+      background: rgba(0,0,0,.55);
+      padding: 6px 9px;
+      border: 1px solid rgba(214,177,91,.35);
+    }
+
+    .character-name {
+      font-size: 25px;
+      letter-spacing: 3px;
+      font-weight: 800;
+    }
+
+    .character-title {
+      margin-top: 3px;
+      color: var(--gold);
+      font-size: 10px;
+      letter-spacing: 3px;
+    }
+
+    /* =========================
+       ROADMAP
+    ========================= */
+
+    .roadmap {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .roadmap-item {
+      position: relative;
+      padding: 0 0 42px 35px;
+      border-left: 1px solid rgba(214,177,91,.45);
+    }
+
+    .roadmap-item:last-child {
+      border-left: 1px solid transparent;
+    }
+
+    .roadmap-item::before {
+      content: "";
+      position: absolute;
+      width: 9px;
+      height: 9px;
+      left: -5px;
+      top: 0;
+      border-radius: 50%;
+      background: var(--gold);
+      box-shadow: 0 0 15px rgba(214,177,91,.5);
+    }
+
+    .roadmap-item h3 {
+      color: var(--gold);
+      font-size: 12px;
+      letter-spacing: 3px;
+      margin-bottom: 8px;
+    }
+
+    .roadmap-item p {
+      color: #777;
+      font-size: 14px;
+    }
+
+    /* =========================
+       COMMUNITY
+    ========================= */
+
+    .community {
+      max-width: none;
+      text-align: center;
+      border-top: 1px solid var(--line);
+      border-bottom: 1px solid var(--line);
+      background:
+        radial-gradient(
+          circle at center,
+          rgba(35,100,135,.12),
+          transparent 45%
+        ),
+        #070707;
+    }
+
+    .community-content {
+      max-width: 800px;
+      margin: auto;
+    }
+
+    .socials {
+      display: flex;
+      justify-content: center;
+      gap: 15px;
+      flex-wrap: wrap;
+      margin-top: 32px;
+    }
+
+    /* =========================
+       FOOTER
+    ========================= */
+
+    footer {
+      padding: 45px 20px;
+      text-align: center;
+      color: #555;
+      font-size: 10px;
+      letter-spacing: 2px;
+    }
+
+    footer strong {
+      color: var(--gold);
+    }
+
+    /* =========================
+       ANIMATIONS
+    ========================= */
+
+    @keyframes ring {
+      0%, 100% {
+        transform: scale(.96);
+        opacity: .45;
+      }
+
+      50% {
+        transform: scale(1.04);
+        opacity: 1;
+      }
+    }
+
+    /* =========================
+       MOBILE
+    ========================= */
+
+    @media (max-width: 900px) {
+
+      .characters {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .nav-links {
+        gap: 15px;
+      }
+
+    }
+
+    @media (max-width: 600px) {
+
+      nav {
+        padding: 0 20px;
+      }
+
+      .nav-links {
+        display: none;
+      }
+
+      section {
+        padding: 85px 20px;
+      }
+
+      .characters {
+        grid-template-columns: 1fr;
+      }
+
+      .character,
+      .character img {
+        min-height: 520px;
+      }
+
+      .hero h1 {
+        letter-spacing: 4px;
+      }
+
+      .hero h2 {
+        letter-spacing: 4px;
+      }
+
+    }
+
+  </style>
+</head>
+
+
+<body>
+
+  <!-- NAVIGATION -->
+
+  <nav>
+
+    <a href="#" class="brand">
+      PERSIA 2099
+      <span>GENESIS GUARDIANS</span>
+    </a>
+
+    <div class="nav-links">
+      <a href="#world">WORLD</a>
+      <a href="#guardians">GUARDIANS</a>
+      <a href="#roadmap">ROADMAP</a>
+      <a href="#community">COMMUNITY</a>
+    </div>
+
+  </nav>
+
+
+  <!-- HERO -->
+
+  <header class="hero">
+
+    <div class="hero-content">
+
+      <div class="eyebrow">
+        GENESIS GUARDIANS
+      </div>
+
+      <h1>
+        PERSIA<br>2099
+      </h1>
+
+      <h2>
+        THE LEGACY AWAKENS
+      </h2>
+
+      <p class="hero-description">
+        A futuristic Persian universe where ancient legends,
+        forgotten empires and cybernetic warriors collide.
+      </p>
+
+      <a href="#world" class="button">
+        ENTER THE WORLD
+      </a>
+
+    </div>
+
+  </header>
+
+
+  <!-- WORLD -->
+
+  <section id="world">
+
+    <div class="section-heading">
+
+      <span>The World</span>
+
+      <h2>THE YEAR 2099</h2>
+
+    </div>
+
+    <div class="lore">
+
+      <p>
+        The year is <strong>2099</strong>.
+        The world has changed, but the memory of Persia has survived.
+      </p>
+
+      <div class="lore-divider"></div>
+
+      <p>
+        From the ruins of ancient civilizations,
+        a new generation of Guardians rises.
+        They carry the symbols, legends and spirit of a forgotten age
+        into a world ruled by technology.
+      </p>
+
+      <div class="lore-divider"></div>
+
+      <p>
+        This is not the end of history.
+        <strong>This is its rebirth.</strong>
+      </p>
+
+    </div>
+
+  </section>
+
+
+  <!-- GUARDIANS -->
+
+  <section id="guardians">
+
+    <div class="section-heading">
+
+      <span>Genesis Collection</span>
+
+      <h2>THE GUARDIANS</h2>
+
+      <p>
+        Six legendary figures. One future.
+      </p>
+
+    </div>
+
+
+    <div class="characters">
+
+
+      <!-- ARASH -->
+
+      <article class="character">
+
+        <img
+          src="arash-2099.png"
+          alt="Arash 2099"
+        >
+
+        <div class="character-overlay">
+
+          <div class="character-number">
+            001
+          </div>
+
+          <div class="character-name">
+            ARASH 2099
+          </div>
+
+          <div class="character-title">
+            THE CYBER WARRIOR
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- CYRUS -->
+
+      <article class="character">
+
+        <img
+          src="cyrus-prime.png"
+          alt="Cyrus Prime"
+        >
+
+        <div class="character-overlay">
+
+          <div class="character-number">
+            002
+          </div>
+
+          <div class="character-name">
+            CYRUS PRIME
+          </div>
+
+          <div class="character-title">
+            THE DIGITAL KING
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ROSTAM -->
+
+      <article class="character">
+
+        <img
+          src="rostam-x.png"
+          alt="Rostam X"
+        >
+
+        <div class="character-overlay">
+
+          <div class="character-number">
+            003
+          </div>
+
+          <div class="character-name">
+            ROSTAM X
+          </div>
+
+          <div class="character-title">
+            THE LAST HERO
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- ANAHITA -->
+
+      <article class="character">
+
+        <img
+          src="Anahita.png"
+          alt="Anahita"
+        >
+
+        <div class="character-overlay">
+
+          <div class="character-number">
+            004
+          </div>
+
+          <div class="character-name">
+            ANAHITA
+          </div>
+
+          <div class="character-title">
+            THE CYBER GODDESS
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- MITHRA -->
+
+      <article class="character">
+
+        <img
+          src="mithra.png"
+          alt="Mithra"
+        >
+
+        <div class="character-overlay">
+
+          <div class="character-number">
+            005
+          </div>
+
+          <div class="character-name">
+            MITHRA
+          </div>
+
+          <div class="character-title">
+            THE GUARDIAN OF LIGHT
+          </div>
+
+        </div>
+
+      </article>
+
+
+      <!-- DARIUS -->
+
+      <article class="character">
+
+        <img
+          src="darius-zero.png"
+          alt="Darius Zero"
+        >
+
+        <div class="character-overlay">
+
+          <div class="character-number">
+            006
+          </div>
+
+          <div class="character-name">
+            DARIUS ZERO
+          </div>
+
+          <div class="character-title">
+            THE LOST EMPEROR
+          </div>
+
+        </div>
+
+      </article>
+
+
+    </div>
+
+  </section>
+
+
+  <!-- ROADMAP -->
+
+  <section id="roadmap">
+
+    <div class="section-heading">
+
+      <span>The Beginning</span>
+
+      <h2>ROADMAP</h2>
+
+    </div>
+
+
+    <div class="roadmap">
+
+
+      <div class="roadmap-item">
+
+        <h3>PHASE 01 — GENESIS</h3>
+
+        <p>
+          The first Guardians are revealed.
+          The world of Persia 2099 begins to take shape.
+        </p>
+
+      </div>
+
+
+      <div class="roadmap-item">
+
+        <h3>PHASE 02 — THE WORLD</h3>
+
+        <p>
+          Lore, characters, factions and the history
+          of the Persia 2099 universe expand.
+        </p>
+
+      </div>
+
+
+      <div class="roadmap-item">
+
+        <h3>PHASE 03 — THE COMMUNITY</h3>
+
+        <p>
+          Guardians gather and the official community grows.
+        </p>
+
+      </div>
+
+
+      <div class="roadmap-item">
+
+        <h3>PHASE 04 — GENESIS COLLECTION</h3>
+
+        <p>
+          The Genesis Guardians become part of
+          the digital collection.
+        </p>
+
+      </div>
+
+
+      <div class="roadmap-item">
+
+        <h3>PHASE 05 — THE FUTURE</h3>
+
+        <p>
+          The story continues beyond 2099.
+        </p>
+
+      </div>
+
+
+    </div>
+
+  </section>
+
+
+  <!-- COMMUNITY -->
+
+  <section id="community" class="community">
+
+    <div class="community-content">
+
+      <div class="section-heading">
+
+        <span>Join The Guardians</span>
+
+        <h2>THE FUTURE IS COMING</h2>
+
+      </div>
+
+      <div class="lore">
+
+        <p>
+          It’s coming.
+          Right now, we're focused on building the world first.
+          Once enough Guardians gather,
+          the official community will open.
+        </p>
+
+      </div>
+
+
+      <div class="socials">
+
+        <a
+          class="button"
+          href="https://x.com/Persia2099NFT"
+          target="_blank"
+          rel="noopener"
+        >
+          X / TWITTER
+        </a>
+
+
+        <a
+          class="button"
+          href="https://t.me/Persia2099NFT"
+          target="_blank"
+          rel="noopener"
+        >
+          TELEGRAM
+        </a>
+
+      </div>
+
+    </div>
+
+  </section>
+
+
+  <!-- FOOTER -->
+
+  <footer>
+
+    <strong>PERSIA 2099</strong>
+
+    &nbsp; — &nbsp;
+
+    GENESIS GUARDIANS
+
+    <br><br>
+
+    © 2099 Persia 2099. All rights reserved.
+
+  </footer>
+
+
+</body>
+</html>
