@@ -1,0 +1,12 @@
+{
+  "name": "Darius Zero",
+  "symbol": "P2099",
+  "description": "Commander of the Guardian armies. Every battle is won through precision, intelligence, and discipline.",
+  "image": "006-darius-zero.png",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Strategy"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "006"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
