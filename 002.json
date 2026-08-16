@@ -1,0 +1,12 @@
+{
+  "name": "Cyrus Prime",
+  "symbol": "P2099",
+  "description": "The supreme ruler who unites the Guardians through wisdom instead of fear.",
+  "image": "002-cyrus-prime.png",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Leadership"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "002"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
