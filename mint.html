@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Persia 2099 — Devnet Mint</title>
+
+  <script src="https://unpkg.com/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      background: #090909;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .box {
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      padding: 30px;
+      border: 1px solid #333;
+      border-radius: 16px;
+      background: #111;
+    }
+
+    img {
+      width: 100%;
+      border-radius: 12px;
+      margin-bottom: 20px;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 10px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    #connect {
+      background: white;
+      color: black;
+    }
+
+    #mint {
+      background: #9945ff;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: .5;
+    }
+
+    #status {
+      margin-top: 20px;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>Persia 2099</h1>
+  <h2>Arash 2099 — #001</h2>
+
+  <img
+    src="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeih7x3h5dalag3mlviqrjqu6c7e7rl22eqpabb5auejxwmsopboz24"
+    alt="Arash 2099"
+  >
+
+  <button id="connect">Connect Phantom</button>
+
+  <button id="mint" disabled>Mint Arash #001 — Devnet</button>
+
+  <div id="status">Wallet not connected.</div>
+
+</div>
+
+<script>
+
+const connection = new solanaWeb3.Connection(
+  "https://api.devnet.solana.com",
+  "confirmed"
+);
+
+const metadataUri =
+  "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreid2ozmgxjfc6xf4a6r4hvnxnzasnq24cimykprq6jevhxiksunhfi";
+
+let wallet = null;
+
+const connectButton = document.getElementById("connect");
+const mintButton = document.getElementById("mint");
+const status = document.getElementById("status");
+
+connectButton.onclick = async () => {
+
+  try {
+
+    if (!window.solana || !window.solana.isPhantom) {
+      status.innerText =
+        "Phantom wallet was not detected. Open this page in a browser where Phantom is installed.";
+      return;
+    }
+
+    const response = await window.solana.connect();
+
+    wallet = response.publicKey;
+
+    status.innerText =
+      "Connected:\n" + wallet.toString();
+
+    mintButton.disabled = false;
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.innerText =
+      "Wallet connection cancelled or failed.";
+
+  }
+
+};
+
+mintButton.onclick = async () => {
+
+  try {
+
+    mintButton.disabled = true;
+
+    status.innerText =
+      "Preparing Devnet transaction...";
+
+    /*
+      IMPORTANT:
+      This first test only checks that Phantom can sign
+      a Devnet transaction from the connected wallet.
+
+      We do NOT send SOL anywhere.
+    */
+
+    const latestBlockhash =
+      await connection.getLatestBlockhash("confirmed");
+
+    const transaction =
+      new solanaWeb3.Transaction({
+        recentBlockhash: latestBlockhash.blockhash,
+        feePayer: wallet
+      });
+
+    const memoInstruction =
+      new solanaWeb3.TransactionInstruction({
+        keys: [],
+        programId: solanaWeb3.SystemProgram.programId,
+        data: new TextEncoder().encode(
+          "PERSIA2099_DEVNET_TEST_ARASH_001"
+        )
+      });
+
+    /*
+      Do not continue automatically.
+      Phantom will show the transaction for approval.
+    */
+
+    transaction.add(memoInstruction);
+
+    const signed =
+      await window.solana.signTransaction(transaction);
+
+    status.innerText =
+      "Transaction signed successfully.\n\n" +
+      "We have NOT broadcast it yet.";
+
+    console.log(signed);
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.innerText =
+      "Transaction was cancelled or failed.";
+
+    mintButton.disabled = false;
+
+  }
+
+};
+
+</script>
+
+</body>
+</html>
