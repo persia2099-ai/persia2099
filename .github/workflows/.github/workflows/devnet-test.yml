@@ -1,0 +1,30 @@
+name: Persia 2099 Devnet Test
+
+on:
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Verify environment
+        run: |
+          node --version
+          npm --version
+          echo "PERSIA 2099 DEVNET TEST"
+          echo "Order locked:"
+          echo "001 Arash 2099"
+          echo "002 Cyrus Prime"
+          echo "003 Mithra"
+          echo "004 Anahita"
+          echo "005 Rostam X"
+          echo "006 Darius Zero"
