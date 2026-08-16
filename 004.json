@@ -1,0 +1,12 @@
+{
+  "name": "Anahita",
+  "symbol": "P2099",
+  "description": "Protector of balance, nature, and renewal. She restores hope wherever destruction spreads.",
+  "image": "004-anahita.png",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Life"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "004"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
