@@ -1,0 +1,12 @@
+{
+  "name": "Rostam X",
+  "symbol": "P2099",
+  "description": "The Titan defender forged for impossible battles. His immense power is balanced by honor and discipline.",
+  "image": "005-rostam-x.png",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Strength"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "005"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
