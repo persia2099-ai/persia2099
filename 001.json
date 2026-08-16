@@ -1,0 +1,24 @@
+{
+  "name": "Arash 2099",
+  "symbol": "P2099",
+  "description": "The first warrior awakened by AURA. His energy blade symbolizes justice and determination.",
+  "image": "001-arash-2099.png",
+  "attributes": [
+    {
+      "trait_type": "Guardian",
+      "value": "Courage"
+    },
+    {
+      "trait_type": "Generation",
+      "value": "Genesis"
+    },
+    {
+      "trait_type": "Guardian Number",
+      "value": "001"
+    },
+    {
+      "trait_type": "Universe",
+      "value": "Persia 2099"
+    }
+  ]
+}
