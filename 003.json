@@ -1,0 +1,12 @@
+{
+  "name": "Mithra",
+  "symbol": "P2099",
+  "description": "Master of solar energy and truth. His light reveals deception and drives back darkness.",
+  "image": "003-mithra.png",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Light"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "003"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
