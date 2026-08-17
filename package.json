@@ -1,15 +1,17 @@
 {
+  "name": "persia2099",
+  "private": true,
+  "version": "1.0.0",
+  "type": "module",
   "scripts": {
     "build": "vite build"
   },
   "dependencies": {
-    "@metaplex-foundation/mpl-core": "latest",
-    "@metaplex-foundation/umi": "latest",
-    "@metaplex-foundation/umi-bundle-defaults": "latest",
-    "@metaplex-foundation/umi-signer-wallet-adapters": "latest",
-    "@solana/wallet-adapter-base": "latest",
-    "@solana/wallet-adapter-wallets": "latest",
-    "vite": "latest"
-  },
-  "devDependencies": {}
+    "@metaplex-foundation/mpl-core": "^1.7.0",
+    "@metaplex-foundation/umi": "^1.4.1",
+    "@metaplex-foundation/umi-bundle-defaults": "^1.4.1",
+    "@metaplex-foundation/umi-signer-wallet-adapters": "^1.1.1",
+    "@solana/wallet-adapter-wallets": "^0.19.37",
+    "vite": "^6.3.5"
+  }
 }
