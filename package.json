@@ -1,0 +1,15 @@
+{
+  "scripts": {
+    "build": "vite build"
+  },
+  "dependencies": {
+    "@metaplex-foundation/mpl-core": "latest",
+    "@metaplex-foundation/umi": "latest",
+    "@metaplex-foundation/umi-bundle-defaults": "latest",
+    "@metaplex-foundation/umi-signer-wallet-adapters": "latest",
+    "@solana/wallet-adapter-base": "latest",
+    "@solana/wallet-adapter-wallets": "latest",
+    "vite": "latest"
+  },
+  "devDependencies": {}
+}
