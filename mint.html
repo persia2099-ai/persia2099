@@ -109,6 +109,8 @@ import { walletAdapterIdentity } from
 import { PhantomWalletAdapter } from
   "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
 
+import { base58 } from
+  "https://esm.sh/@metaplex-foundation/umi@1.4.1/serializers";
 
 const RPC = "https://api.devnet.solana.com";
 
@@ -197,7 +199,7 @@ mintButton.onclick = async () => {
 });
 
 
-    const signature = result.signature;
+    const signature = base58.deserialize(result.signature)[0];
 
     const assetAddress = asset.publicKey;
 
