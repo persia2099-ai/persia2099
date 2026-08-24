@@ -181,14 +181,20 @@ mintButton.onclick = async () => {
 
 
     const result = await create(umi, {
-
-      asset,
-
-      name: "Arash 2099",
-
-      uri: METADATA_URI
-
-    }).sendAndConfirm(umi);
+  asset,
+  name: "Arash 2099",
+  uri: METADATA_URI
+}).sendAndConfirm(umi, {
+  send: {
+    skipPreflight: true
+  },
+  confirm: {
+    strategy: {
+      type: "blockhash",
+      ...(await umi.rpc.getLatestBlockhash())
+    }
+  }
+});
 
 
     const signature = result.signature;
