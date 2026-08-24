@@ -3,9 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Persia 2099 — Devnet Mint</title>
-
-  <script src="https://unpkg.com/@solana/web3.js@1.98.4/lib/index.iife.min.js"></script>
+  <title>Persia 2099 — Arash #001</title>
 
   <style>
     body {
@@ -65,6 +63,10 @@
       word-break: break-word;
       line-height: 1.5;
     }
+
+    a {
+      color: #9945ff;
+    }
   </style>
 </head>
 
@@ -82,44 +84,68 @@
 
   <button id="connect">Connect Phantom</button>
 
-  <button id="mint" disabled>Mint Arash #001 — Devnet</button>
+  <button id="mint" disabled>
+    Mint Arash #001 — Devnet
+  </button>
 
   <div id="status">Wallet not connected.</div>
 
 </div>
 
-<script>
+<script type="module">
 
-const connection = new solanaWeb3.Connection(
-  "https://api.devnet.solana.com",
-  "confirmed"
-);
+import { createUmi, generateSigner } from
+  "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
-const metadataUri =
+import { create, mplCore } from
+  "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
+
+import { createUmi as createUmiDefaults } from
+  "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+
+import { walletAdapterIdentity } from
+  "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
+
+import { PhantomWalletAdapter } from
+  "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+
+
+const RPC = "https://api.devnet.solana.com";
+
+const METADATA_URI =
   "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreid2ozmgxjfc6xf4a6r4hvnxnzasnq24cimykprq6jevhxiksunhfi";
 
-let wallet = null;
+const IMAGE_URI =
+  "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeih7x3h5dalag3mlviqrjqu6c7e7rl22eqpabb5auejxwmsopboz24";
 
+
+const status = document.getElementById("status");
 const connectButton = document.getElementById("connect");
 const mintButton = document.getElementById("mint");
-const status = document.getElementById("status");
+
+
+const umi = createUmiDefaults(RPC)
+  .use(mplCore());
+
+
+const wallet = new PhantomWalletAdapter();
+
 
 connectButton.onclick = async () => {
 
   try {
 
-    if (!window.solana || !window.solana.isPhantom) {
-      status.innerText =
-        "Phantom wallet was not detected. Open this page in a browser where Phantom is installed.";
-      return;
-    }
+    status.innerText = "Connecting Phantom...";
 
-    const response = await window.solana.connect();
+    await wallet.connect();
 
-    wallet = response.publicKey;
+    umi.use(walletAdapterIdentity(wallet));
 
     status.innerText =
-      "Connected:\n" + wallet.toString();
+      "Connected:\n" +
+      wallet.publicKey.toBase58();
+
+    connectButton.innerText = "Phantom Connected";
 
     mintButton.disabled = false;
 
@@ -128,11 +154,13 @@ connectButton.onclick = async () => {
     console.error(error);
 
     status.innerText =
-      "Wallet connection cancelled or failed.";
+      "Phantom connection failed:\n" +
+      (error?.message || error);
 
   }
 
 };
+
 
 mintButton.onclick = async () => {
 
@@ -141,56 +169,63 @@ mintButton.onclick = async () => {
     mintButton.disabled = true;
 
     status.innerText =
-      "Preparing Devnet transaction...";
+      "Preparing Arash 2099 #001...\n\n" +
+      "Please confirm the transaction in Phantom.";
 
     /*
-      IMPORTANT:
-      This first test only checks that Phantom can sign
-      a Devnet transaction from the connected wallet.
-
-      We do NOT send SOL anywhere.
+      Generate a completely new Core Asset address.
+      This is required for every new Asset.
     */
 
-    const latestBlockhash =
-      await connection.getLatestBlockhash("confirmed");
+    const asset = generateSigner(umi);
 
-    const transaction =
-      new solanaWeb3.Transaction({
-        recentBlockhash: latestBlockhash.blockhash,
-        feePayer: wallet
-      });
 
-    const memoInstruction =
-      new solanaWeb3.TransactionInstruction({
-        keys: [],
-        programId: solanaWeb3.SystemProgram.programId,
-        data: new TextEncoder().encode(
-          "PERSIA2099_DEVNET_TEST_ARASH_001"
-        )
-      });
+    const result = await create(umi, {
 
-    /*
-      Do not continue automatically.
-      Phantom will show the transaction for approval.
-    */
+      asset,
 
-    transaction.add(memoInstruction);
+      name: "Arash 2099",
 
-    const signed =
-      await window.solana.signTransaction(transaction);
+      uri: METADATA_URI
 
-    status.innerText =
-      "Transaction signed successfully.\n\n" +
-      "We have NOT broadcast it yet.";
+    }).sendAndConfirm(umi);
 
-    console.log(signed);
+
+    const signature = result.signature;
+
+    const assetAddress = asset.publicKey;
+
+
+    status.innerHTML =
+      "<strong>SUCCESS!</strong><br><br>" +
+
+      "Arash 2099 #001 was created on Devnet.<br><br>" +
+
+      "<b>Asset:</b><br>" +
+      assetAddress + "<br><br>" +
+
+      "<b>Transaction:</b><br>" +
+
+      "<a target='_blank' href='https://explorer.solana.com/tx/" +
+      signature +
+      "?cluster=devnet'>" +
+
+      "View on Solana Explorer" +
+
+      "</a>";
+
+
+    console.log("ARASH #001 CREATED");
+    console.log("Asset:", assetAddress);
+    console.log("Signature:", signature);
 
   } catch (error) {
 
     console.error(error);
 
     status.innerText =
-      "Transaction was cancelled or failed.";
+      "Mint failed:\n\n" +
+      (error?.message || error);
 
     mintButton.disabled = false;
 
