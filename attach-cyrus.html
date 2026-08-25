@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>Persia 2099 — Attach Cyrus #002</title>
+
+  <style>
+    body {
+      margin: 0;
+      background: #090909;
+      color: white;
+      font-family: Arial, sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .box {
+      width: 90%;
+      max-width: 420px;
+      text-align: center;
+      padding: 30px;
+      border: 1px solid #333;
+      border-radius: 16px;
+      background: #111;
+    }
+
+    button {
+      width: 100%;
+      padding: 14px;
+      margin-top: 12px;
+      border: 0;
+      border-radius: 10px;
+      cursor: pointer;
+      font-size: 16px;
+      font-weight: bold;
+    }
+
+    #connect {
+      background: white;
+      color: black;
+    }
+
+    #attach {
+      background: #9945ff;
+      color: white;
+    }
+
+    button:disabled {
+      opacity: .5;
+    }
+
+    #status {
+      margin-top: 20px;
+      word-break: break-word;
+      line-height: 1.5;
+    }
+
+    a {
+      color: #9945ff;
+    }
+  </style>
+</head>
+
+<body>
+
+<div class="box">
+
+  <h1>Persia 2099</h1>
+
+  <h2>Cyrus Prime — #002</h2>
+
+  <p>
+    Add existing Asset to<br>
+    GENESIS GUARDIANS
+  </p>
+
+  <button id="connect">
+    Connect Phantom
+  </button>
+
+  <button id="attach" disabled>
+    Add Cyrus #002 to Collection
+  </button>
+
+  <div id="status">
+    Wallet not connected.
+  </div>
+
+</div>
+
+<script type="module">
+
+import {
+  createUmi
+} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+
+import {
+  publicKey
+} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+
+import {
+  mplCore,
+  fetchAsset,
+  fetchCollection,
+  update,
+  updateAuthority
+} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
+
+import {
+  walletAdapterIdentity
+} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
+
+import {
+  PhantomWalletAdapter
+} from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+
+import {
+  base58
+} from "https://esm.sh/@metaplex-foundation/umi@1.4.1/serializers";
+
+
+const RPC =
+  "https://api.devnet.solana.com";
+
+
+const ASSET_ADDRESS =
+  "47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K";
+
+
+const COLLECTION_ADDRESS =
+  "6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
+
+
+const umi =
+  createUmi(RPC)
+    .use(mplCore());
+
+
+const wallet =
+  new PhantomWalletAdapter();
+
+
+const connectButton =
+  document.getElementById("connect");
+
+
+const attachButton =
+  document.getElementById("attach");
+
+
+const status =
+  document.getElementById("status");
+
+
+connectButton.onclick = async () => {
+
+  try {
+
+    status.innerText =
+      "Connecting Phantom...";
+
+    await wallet.connect();
+
+    umi.use(
+      walletAdapterIdentity(wallet)
+    );
+
+    status.innerText =
+      "Connected:\n\n" +
+      wallet.publicKey.toBase58();
+
+    connectButton.innerText =
+      "Phantom Connected";
+
+    attachButton.disabled = false;
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.innerText =
+      "Connection failed:\n\n" +
+      (error?.message || error);
+
+  }
+
+};
+
+
+attachButton.onclick = async () => {
+
+  try {
+
+    attachButton.disabled = true;
+
+    status.innerText =
+      "Checking Cyrus #002...\n\n" +
+      "Please wait.";
+
+
+    const asset =
+      await fetchAsset(
+        umi,
+        publicKey(ASSET_ADDRESS)
+      );
+
+
+    const collection =
+      await fetchCollection(
+        umi,
+        publicKey(COLLECTION_ADDRESS)
+      );
+
+
+    status.innerText =
+      "Cyrus #002 found.\n\n" +
+      "Collection found.\n\n" +
+      "Preparing transaction...\n\n" +
+      "Confirm in Phantom.";
+
+
+    const result =
+      await update(umi, {
+
+        asset: asset,
+
+        newCollection:
+          collection.publicKey,
+
+        newUpdateAuthority:
+          updateAuthority(
+            "Collection",
+            [collection.publicKey]
+          )
+
+      }).sendAndConfirm(umi);
+
+
+    const signature =
+      base58.deserialize(
+        result.signature
+      )[0];
+
+
+    status.innerHTML =
+      "<strong>SUCCESS!</strong><br><br>" +
+
+      "Cyrus Prime #002 is now part of<br>" +
+
+      "Persia 2099 — GENESIS GUARDIANS." +
+
+      "<br><br>" +
+
+      "<b>Asset:</b><br>" +
+      ASSET_ADDRESS +
+
+      "<br><br>" +
+
+      "<b>Collection:</b><br>" +
+      COLLECTION_ADDRESS +
+
+      "<br><br>" +
+
+      "<a target='_blank' href='https://explorer.solana.com/tx/" +
+      signature +
+      "?cluster=devnet'>" +
+
+      "View Transaction on Solana Explorer" +
+
+      "</a>";
+
+
+    console.log(
+      "CYRUS #002 ADDED TO COLLECTION"
+    );
+
+    console.log(
+      "Asset:",
+      ASSET_ADDRESS
+    );
+
+    console.log(
+      "Collection:",
+      COLLECTION_ADDRESS
+    );
+
+    console.log(
+      "Signature:",
+      signature
+    );
+
+
+  } catch (error) {
+
+    console.error(error);
+
+    status.innerText =
+      "Attach failed:\n\n" +
+      (error?.message || error);
+
+    attachButton.disabled = false;
+
+  }
+
+};
+
+</script>
+
+</body>
+</html>
