@@ -2,292 +2,278 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Persia 2099 — Attach Anahita #004</title>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persia 2099 — Attach Anahita #004</title>
 
-  <style>
-    body {
-      margin: 0;
-      background: #090909;
-      color: white;
-      font-family: Arial, sans-serif;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      min-height: 100vh;
-    }
-
-    .box {
-      width: 90%;
-      max-width: 420px;
-      text-align: center;
-      padding: 30px;
-      border: 1px solid #333;
-      border-radius: 16px;
-      background: #111;
-    }
-
-    button {
-      width: 100%;
-      padding: 14px;
-      margin-top: 12px;
-      border: 0;
-      border-radius: 10px;
-      cursor: pointer;
-      font-size: 16px;
-      font-weight: bold;
-    }
-
-    #connect {
-      background: white;
-      color: black;
-    }
-
-    #attach {
-      background: #9945ff;
-      color: white;
-    }
-
-    button:disabled {
-      opacity: .5;
-    }
-
-    #status {
-      margin-top: 20px;
-      word-break: break-word;
-      line-height: 1.5;
-    }
-
-    a {
-      color: #9945ff;
-    }
-  </style>
+<style>
+body{
+margin:0;
+background:#090909;
+color:white;
+font-family:Arial,sans-serif;
+display:flex;
+justify-content:center;
+align-items:center;
+min-height:100vh
+}
+.box{
+width:90%;
+max-width:420px;
+text-align:center;
+padding:30px;
+border:1px solid #333;
+border-radius:16px;
+background:#111
+}
+button{
+width:100%;
+padding:14px;
+margin-top:12px;
+border:0;
+border-radius:10px;
+cursor:pointer;
+font-size:16px;
+font-weight:bold
+}
+#connect{background:white;color:black}
+#attach{background:#9945ff;color:white}
+button:disabled{opacity:.5}
+#status{
+margin-top:20px;
+word-break:break-word;
+line-height:1.5
+}
+a{color:#9945ff}
+</style>
 </head>
 
 <body>
 
 <div class="box">
 
-  <h1>Persia 2099</h1>
+<h1>Persia 2099</h1>
 
-  <h2>Anahita — #004</h2>
+<h2>Anahita — #004</h2>
 
-  <p>
-    Add existing Anahita Asset to<br>
-    GENESIS GUARDIANS
-  </p>
+<p>Add Anahita #004 to<br>
+GENESIS GUARDIANS</p>
 
-  <button id="connect">
-    Connect Phantom
-  </button>
+<button id="connect">Connect Phantom</button>
 
-  <button id="attach" disabled>
-    Add Anahita #004 to Collection
-  </button>
+<button id="attach" disabled>
+Add Anahita #004 to Collection
+</button>
 
-  <div id="status">
-    Wallet not connected.
-  </div>
+<div id="status">
+Wallet not connected.
+</div>
 
 </div>
 
 <script type="module">
 
 import {
-  createUmi
+createUmi
 } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
 
 import {
-  publicKey
+publicKey
 } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
-  mplCore,
-  fetchAsset,
-  fetchCollection,
-  update,
-  updateAuthority
+mplCore,
+fetchAsset,
+fetchCollection,
+update,
+updateAuthority
 } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 
 import {
-  walletAdapterIdentity
+walletAdapterIdentity
 } from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
 
 import {
-  PhantomWalletAdapter
+PhantomWalletAdapter
 } from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
 
 import {
-  base58
+base58
 } from "https://esm.sh/@metaplex-foundation/umi@1.4.1/serializers";
 
+
 const RPC =
-  "https://api.devnet.solana.com";
+"https://api.devnet.solana.com";
 
 const ASSET_ADDRESS =
-  "6u7kdrmSZuW75UAy4545xiUSgjeG4o24bPvJeXbWEZFW";
+"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk";
 
 const COLLECTION_ADDRESS =
-  "6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
+"6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
+
 
 const umi =
-  createUmi(RPC)
-    .use(mplCore());
+createUmi(RPC)
+.use(mplCore());
+
 
 const wallet =
-  new PhantomWalletAdapter();
+new PhantomWalletAdapter();
+
 
 const connectButton =
-  document.getElementById("connect");
+document.getElementById("connect");
 
 const attachButton =
-  document.getElementById("attach");
+document.getElementById("attach");
 
 const status =
-  document.getElementById("status");
+document.getElementById("status");
+
 
 connectButton.onclick = async () => {
 
-  try {
+try {
 
-    status.innerText =
-      "Connecting Phantom...";
+status.innerText =
+"Connecting Phantom...";
 
-    await wallet.connect();
+await wallet.connect();
 
-    umi.use(
-      walletAdapterIdentity(wallet)
-    );
+umi.use(
+walletAdapterIdentity(wallet)
+);
 
-    status.innerText =
-      "Connected:\n\n" +
-      wallet.publicKey.toBase58();
+status.innerText =
+"Connected:\n\n" +
+wallet.publicKey.toBase58();
 
-    connectButton.innerText =
-      "Phantom Connected";
+connectButton.innerText =
+"Phantom Connected";
 
-    attachButton.disabled = false;
+attachButton.disabled = false;
 
-  } catch (error) {
+} catch(error) {
 
-    console.error(error);
+console.error(error);
 
-    status.innerText =
-      "Connection failed:\n\n" +
-      (error?.message || error);
+status.innerText =
+"Connection failed:\n\n" +
+(error?.message || error);
 
-  }
+}
 
 };
 
+
 attachButton.onclick = async () => {
 
-  try {
+try {
 
-    attachButton.disabled = true;
+attachButton.disabled = true;
 
-    status.innerText =
-      "Checking Anahita #004...\n\n" +
-      "Please wait.";
+status.innerText =
+"Checking Anahita #004...\n\nPlease wait.";
 
-    const asset =
-      await fetchAsset(
-        umi,
-        publicKey(ASSET_ADDRESS)
-      );
 
-    const collection =
-      await fetchCollection(
-        umi,
-        publicKey(COLLECTION_ADDRESS)
-      );
+const asset =
+await fetchAsset(
+umi,
+publicKey(ASSET_ADDRESS)
+);
 
-    status.innerText =
-      "Anahita #004 found.\n\n" +
-      "Genesis Guardians Collection found.\n\n" +
-      "Preparing transaction...\n\n" +
-      "Please confirm in Phantom.";
 
-    const result =
-      await update(umi, {
+const collection =
+await fetchCollection(
+umi,
+publicKey(COLLECTION_ADDRESS)
+);
 
-        asset: asset,
 
-        newCollection:
-          collection.publicKey,
+status.innerText =
+"Anahita #004 verified.\n\n" +
+"Collection verified.\n\n" +
+"Please confirm the transaction in Phantom.";
 
-        newUpdateAuthority:
-          updateAuthority(
-            "Collection",
-            [collection.publicKey]
-          )
 
-      }).sendAndConfirm(umi);
+const result =
+await update(umi, {
 
-    const signature =
-      base58.deserialize(
-        result.signature
-      )[0];
+asset:asset,
 
-    status.innerHTML =
-      "<strong>SUCCESS!</strong><br><br>" +
+newCollection:
+collection.publicKey,
 
-      "Anahita #004 is now part of<br>" +
-      "Persia 2099 — GENESIS GUARDIANS." +
+newUpdateAuthority:
+updateAuthority(
+"Collection",
+[collection.publicKey]
+)
 
-      "<br><br>" +
+}).sendAndConfirm(umi);
 
-      "<b>Asset:</b><br>" +
-      ASSET_ADDRESS +
 
-      "<br><br>" +
+const signature =
+base58.deserialize(
+result.signature
+)[0];
 
-      "<b>Collection:</b><br>" +
-      COLLECTION_ADDRESS +
 
-      "<br><br>" +
+status.innerHTML =
+"<strong>SUCCESS!</strong><br><br>" +
 
-      "<b>Transaction:</b><br>" +
+"Anahita #004 is now part of<br>" +
+"Persia 2099 — GENESIS GUARDIANS." +
 
-      "<a target='_blank' href='https://explorer.solana.com/tx/" +
-      signature +
-      "?cluster=devnet'>" +
+"<br><br>" +
 
-      "View Transaction on Solana Explorer" +
+"<b>Asset:</b><br>" +
+ASSET_ADDRESS +
 
-      "</a>";
+"<br><br>" +
 
-    console.log(
-      "ANAHITA #004 ADDED TO COLLECTION"
-    );
+"<b>Collection:</b><br>" +
+COLLECTION_ADDRESS +
 
-    console.log(
-      "Asset:",
-      ASSET_ADDRESS
-    );
+"<br><br>" +
 
-    console.log(
-      "Collection:",
-      COLLECTION_ADDRESS
-    );
+"<b>Transaction:</b><br>" +
 
-    console.log(
-      "Signature:",
-      signature
-    );
+"<a target='_blank' href='https://explorer.solana.com/tx/" +
+signature +
+"?cluster=devnet'>" +
 
-  } catch (error) {
+"View Transaction on Solana Explorer" +
 
-    console.error(error);
+"</a>";
 
-    status.innerText =
-      "Attach failed:\n\n" +
-      (error?.message || error);
 
-    attachButton.disabled = false;
+console.log(
+"ANAHITA #004 ATTACHED"
+);
 
-  }
+console.log(
+"ASSET:",
+ASSET_ADDRESS
+);
+
+console.log(
+"SIGNATURE:",
+signature
+);
+
+
+} catch(error) {
+
+console.error(error);
+
+status.innerText =
+"Attach failed:\n\n" +
+(error?.message || error);
+
+attachButton.disabled = false;
+
+}
 
 };
 
