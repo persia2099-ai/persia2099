@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -100,62 +101,58 @@
 <script type="module">
 
 import {
-  generateSigner
-} from
-"https://esm.sh/@metaplex-foundation/umi@1.4.1";
+  createUmi
+} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+
+import {
+  generateSigner,
+  publicKey
+} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
   create,
-  mplCore
-} from
-"https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
-
-import {
-  createUmi
-} from
-"https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+  mplCore,
+  fetchAsset
+} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 
 import {
   walletAdapterIdentity
-} from
-"https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
+} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
 
 import {
   PhantomWalletAdapter
-} from
-"https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+} from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
 
 import {
   base58
-} from
-"https://esm.sh/@metaplex-foundation/umi@1.4.1/serializers";
+} from "https://esm.sh/@metaplex-foundation/umi@1.4.1/serializers";
 
 
 const RPC =
-"https://api.devnet.solana.com";
+  "https://api.devnet.solana.com";
 
 
 const METADATA_URI =
-"https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreifqox6u4ujkfhmfcdtruskbyn4pbs7morl77hor5rrceczqaqx454";
-
-
-const status =
-document.getElementById("status");
-
-const connectButton =
-document.getElementById("connect");
-
-const mintButton =
-document.getElementById("mint");
+  "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreifqox6u4ujkfhmfcdtruskbyn4pbs7morl77hor5rrceczqaqx454";
 
 
 const umi =
-createUmi(RPC)
-.use(mplCore());
+  createUmi(RPC)
+    .use(mplCore());
 
 
 const wallet =
-new PhantomWalletAdapter();
+  new PhantomWalletAdapter();
+
+
+const status =
+  document.getElementById("status");
+
+const connectButton =
+  document.getElementById("connect");
+
+const mintButton =
+  document.getElementById("mint");
 
 
 connectButton.onclick = async () => {
@@ -163,7 +160,7 @@ connectButton.onclick = async () => {
   try {
 
     status.innerText =
-    "Connecting Phantom...";
+      "Connecting Phantom...";
 
     await wallet.connect();
 
@@ -172,11 +169,11 @@ connectButton.onclick = async () => {
     );
 
     status.innerText =
-    "Connected:\n" +
-    wallet.publicKey.toBase58();
+      "Connected:\n\n" +
+      wallet.publicKey.toBase58();
 
     connectButton.innerText =
-    "Phantom Connected";
+      "Phantom Connected";
 
     mintButton.disabled = false;
 
@@ -185,8 +182,8 @@ connectButton.onclick = async () => {
     console.error(error);
 
     status.innerText =
-    "Connection failed:\n\n" +
-    (error?.message || error);
+      "Connection failed:\n\n" +
+      (error?.message || error);
 
   }
 
@@ -196,87 +193,180 @@ connectButton.onclick = async () => {
 mintButton.onclick = async () => {
 
   let assetAddress = null;
-  let mintSignature = null;
+  let signature = null;
 
   try {
 
     mintButton.disabled = true;
 
     status.innerText =
-    "Preparing Anahita #004...\n\n" +
-    "Please confirm the transaction in Phantom.";
+      "Preparing Anahita #004...\n\n" +
+      "Please confirm the transaction in Phantom.";
 
 
     const asset =
-    generateSigner(umi);
-
+      generateSigner(umi);
 
     assetAddress =
-    asset.publicKey.toString();
+      asset.publicKey.toString();
+
+
+    const latestBlockhash =
+      await umi.rpc.getLatestBlockhash();
 
 
     const result =
-    await create(umi, {
+      await create(umi, {
 
-      asset,
+        asset,
 
-      name:
-      "Anahita",
+        name:
+        "Anahita",
 
-      uri:
-      METADATA_URI
+        uri:
+        METADATA_URI
 
-    }).sendAndConfirm(umi, {
+      }).sendAndConfirm(umi, {
 
-      send: {
-        skipPreflight: true
-      },
+        send: {
+          skipPreflight: false
+        },
 
-      confirm: {
-        strategy: {
-          type: "blockhash",
-          ...(await umi.rpc.getLatestBlockhash())
+        confirm: {
+          strategy: {
+            type: "blockhash",
+
+            blockhash:
+              latestBlockhash.blockhash,
+
+            lastValidBlockHeight:
+              latestBlockhash.lastValidBlockHeight
+          }
         }
+
+      });
+
+
+    signature =
+      base58.deserialize(
+        result.signature
+      )[0];
+
+
+    status.innerText =
+      "Verifying transaction on Devnet...";
+
+
+    /*
+      IMPORTANT:
+      Do not show SUCCESS until the
+      Asset can actually be fetched
+      from the blockchain.
+    */
+
+
+    let verifiedAsset = null;
+
+
+    for (let i = 0; i < 10; i++) {
+
+      try {
+
+        verifiedAsset =
+          await fetchAsset(
+            umi,
+            publicKey(assetAddress)
+          );
+
+        if (verifiedAsset) {
+          break;
+        }
+
+      } catch (verifyError) {
+
+        console.log(
+          "Verification attempt",
+          i + 1,
+          verifyError
+        );
+
       }
 
-    });
+      await new Promise(
+        resolve =>
+          setTimeout(resolve, 2000)
+      );
+
+    }
 
 
-    mintSignature =
-    base58.deserialize(
-      result.signature
-    )[0];
+    if (!verifiedAsset) {
+
+      status.innerHTML =
+
+        "<strong>TRANSACTION SENT</strong><br><br>" +
+
+        "The transaction was submitted, " +
+        "but the Asset could not yet be verified.<br><br>" +
+
+        "<b>Asset:</b><br>" +
+        assetAddress +
+
+        "<br><br>" +
+
+        "<b>Transaction:</b><br>" +
+
+        "<a target='_blank' href='https://explorer.solana.com/tx/" +
+        signature +
+        "?cluster=devnet'>" +
+
+        "Check on Solana Explorer" +
+
+        "</a><br><br>" +
+
+        "<b>DO NOT MINT AGAIN YET.</b>";
+
+      mintButton.disabled = false;
+
+      return;
+    }
+
+
+    /*
+      Only here do we declare SUCCESS.
+    */
 
 
     status.innerHTML =
 
-    "<strong>ASSET MINTED!</strong><br><br>" +
+      "<strong>SUCCESS!</strong><br><br>" +
 
-    "Anahita #004 was created successfully.<br><br>" +
+      "Anahita #004 was successfully created on Devnet." +
 
-    "<b>Asset:</b><br>" +
-    assetAddress +
+      "<br><br>" +
 
-    "<br><br>" +
+      "<b>Asset:</b><br>" +
+      assetAddress +
 
-    "<b>Mint Transaction:</b><br>" +
+      "<br><br>" +
 
-    "<a target='_blank' href='https://explorer.solana.com/tx/" +
-    mintSignature +
-    "?cluster=devnet'>" +
+      "<b>Mint Transaction:</b><br>" +
 
-    "View Mint Transaction" +
+      "<a target='_blank' href='https://explorer.solana.com/tx/" +
+      signature +
+      "?cluster=devnet'>" +
 
-    "</a>" +
+      "View Mint Transaction" +
 
-    "<br><br>" +
+      "</a>" +
 
-    "<b>Next:</b><br>" +
+      "<br><br>" +
 
-    "Send the Asset address to continue.";
+      "Send this Asset address to continue the Collection step.";
+
 
     console.log(
-      "ANAHITA #004 CREATED"
+      "ANAHITA #004 VERIFIED"
     );
 
     console.log(
@@ -285,8 +375,8 @@ mintButton.onclick = async () => {
     );
 
     console.log(
-      "MINT:",
-      mintSignature
+      "SIGNATURE:",
+      signature
     );
 
 
@@ -295,44 +385,17 @@ mintButton.onclick = async () => {
     console.error(error);
 
 
-    if (assetAddress) {
+    status.innerHTML =
 
-      status.innerHTML =
+      "<strong>Mint failed.</strong><br><br>" +
 
-      "<strong>Asset Minted</strong><br><br>" +
-
-      "Anahita #004 may already exist.<br><br>" +
-
-      "<b>Asset:</b><br>" +
-      assetAddress +
+      (error?.message || error) +
 
       "<br><br>" +
 
-      (mintSignature
+      "No SUCCESS message was issued.";
 
-        ? "<b>Mint Transaction:</b><br>" +
-
-          "<a target='_blank' href='https://explorer.solana.com/tx/" +
-          mintSignature +
-          "?cluster=devnet'>" +
-
-          "View Mint Transaction" +
-
-          "</a><br><br>"
-
-        : "") +
-
-      "<b>DO NOT MINT AGAIN.</b>";
-
-    } else {
-
-      status.innerText =
-      "Mint failed:\n\n" +
-      (error?.message || error);
-
-      mintButton.disabled = false;
-
-    }
+    mintButton.disabled = false;
 
   }
 
@@ -342,3 +405,4 @@ mintButton.onclick = async () => {
 
 </body>
 </html>
+```
