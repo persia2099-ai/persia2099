@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Persia 2099 — Mithra #003</title>
+  <title>Persia 2099 — Anahita #004</title>
 
   <style>
     body {
@@ -76,11 +76,11 @@
 
   <h1>Persia 2099</h1>
 
-  <h2>Mithra — #003</h2>
+  <h2>Anahita — #004</h2>
 
   <img
-    src="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeifsk4x44e6i5qx2h7obh4bp4slnlrolkgwnjudlf5yxbs3rgebob4"
-    alt="Mithra"
+    src="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeifcmpfidqz33k4is3pu2lnvfzeluissudemuatzgyqbiqh7l43nmq"
+    alt="Anahita"
   >
 
   <button id="connect">
@@ -88,7 +88,7 @@
   </button>
 
   <button id="mint" disabled>
-    Mint Mithra #003 — Devnet
+    Mint Anahita #004 — Devnet
   </button>
 
   <div id="status">
@@ -100,18 +100,13 @@
 <script type="module">
 
 import {
-  generateSigner,
-  publicKey
+  generateSigner
 } from
 "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
   create,
-  mplCore,
-  fetchCollection,
-  fetchAsset,
-  update,
-  updateAuthority
+  mplCore
 } from
 "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 
@@ -140,22 +135,8 @@ const RPC =
 "https://api.devnet.solana.com";
 
 
-const COLLECTION_ADDRESS =
-"6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
-
-
-const GUARDIAN = {
-
-  name:
-  "Mithra",
-
-  number:
-  "003",
-
-  metadata:
-  "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreidh4nkct4kt4kg4lqwolwbmjfvyce4dhavydrjuk5ebnz7dzy4us4"
-
-};
+const METADATA_URI =
+"https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreifqox6u4ujkfhmfcdtruskbyn4pbs7morl77hor5rrceczqaqx454";
 
 
 const status =
@@ -175,11 +156,6 @@ createUmi(RPC)
 
 const wallet =
 new PhantomWalletAdapter();
-
-
-function sleep(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms));
-}
 
 
 connectButton.onclick = async () => {
@@ -227,8 +203,8 @@ mintButton.onclick = async () => {
     mintButton.disabled = true;
 
     status.innerText =
-    "Preparing Mithra #003...\n\n" +
-    "Please confirm the Mint transaction in Phantom.";
+    "Preparing Anahita #004...\n\n" +
+    "Please confirm the transaction in Phantom.";
 
 
     const asset =
@@ -239,21 +215,16 @@ mintButton.onclick = async () => {
     asset.publicKey.toString();
 
 
-    /*
-      STEP 1
-      Mint Mithra
-    */
-
-    const createResult =
+    const result =
     await create(umi, {
 
       asset,
 
       name:
-      GUARDIAN.name,
+      "Anahita",
 
       uri:
-      GUARDIAN.metadata
+      METADATA_URI
 
     }).sendAndConfirm(umi, {
 
@@ -273,178 +244,18 @@ mintButton.onclick = async () => {
 
     mintSignature =
     base58.deserialize(
-      createResult.signature
+      result.signature
     )[0];
 
-
-    status.innerText =
-    "Mithra #003 Minted successfully.\n\n" +
-
-    "Asset:\n" +
-    assetAddress +
-
-    "\n\nWaiting for Devnet RPC...\n\n" +
-
-    "Do NOT close this page.";
-
-
-    /*
-      IMPORTANT:
-      Wait for the new Asset to become visible
-      through the RPC before trying fetchAsset().
-    */
-
-    let fetchedAsset = null;
-
-    for (
-      let attempt = 1;
-      attempt <= 12;
-      attempt++
-    ) {
-
-      await sleep(3000);
-
-      try {
-
-        fetchedAsset =
-        await fetchAsset(
-          umi,
-          publicKey(assetAddress)
-        );
-
-        if (fetchedAsset) {
-          break;
-        }
-
-      } catch (e) {
-
-        console.log(
-          "Waiting for Asset...",
-          attempt
-        );
-
-      }
-
-      status.innerText =
-      "Mithra #003 Minted.\n\n" +
-
-      "Asset:\n" +
-      assetAddress +
-
-      "\n\nWaiting for Devnet RPC... " +
-
-      attempt +
-      "/12";
-
-    }
-
-
-    /*
-      If RPC still cannot see Asset,
-      DO NOT mint again.
-    */
-
-    if (!fetchedAsset) {
-
-      status.innerHTML =
-
-      "<strong>MITHRA #003 CREATED</strong><br><br>" +
-
-      "<b>Asset:</b><br>" +
-      assetAddress +
-
-      "<br><br>" +
-
-      "<b>Mint Transaction:</b><br>" +
-
-      "<a target='_blank' href='https://explorer.solana.com/tx/" +
-      mintSignature +
-      "?cluster=devnet'>" +
-
-      "View Mint Transaction" +
-
-      "</a>" +
-
-      "<br><br>" +
-
-      "Asset is still propagating on Devnet.<br>" +
-
-      "<b>Do NOT Mint Again.</b>";
-
-      return;
-    }
-
-
-    /*
-      STEP 2
-      Load Collection
-    */
-
-    status.innerText =
-    "Mithra #003 detected.\n\n" +
-
-    "Loading Genesis Guardians Collection...\n\n" +
-
-    "Please confirm the Collection transaction in Phantom.";
-
-
-    const collection =
-    await fetchCollection(
-      umi,
-      publicKey(COLLECTION_ADDRESS)
-    );
-
-
-    /*
-      STEP 3
-      Attach existing Asset
-    */
-
-    const collectionResult =
-    await update(umi, {
-
-      asset:
-      fetchedAsset,
-
-      newCollection:
-      collection.publicKey,
-
-      newUpdateAuthority:
-      updateAuthority(
-        "Collection",
-        [collection.publicKey]
-      )
-
-    }).sendAndConfirm(umi);
-
-
-    const collectionSignature =
-    base58.deserialize(
-      collectionResult.signature
-    )[0];
-
-
-    /*
-      FINAL SUCCESS
-    */
 
     status.innerHTML =
 
-    "<strong>SUCCESS!</strong><br><br>" +
+    "<strong>ASSET MINTED!</strong><br><br>" +
 
-    "Mithra #003 is now part of<br>" +
-
-    "Persia 2099 — GENESIS GUARDIANS." +
-
-    "<br><br>" +
+    "Anahita #004 was created successfully.<br><br>" +
 
     "<b>Asset:</b><br>" +
     assetAddress +
-
-    "<br><br>" +
-
-    "<b>Collection:</b><br>" +
-    COLLECTION_ADDRESS +
 
     "<br><br>" +
 
@@ -460,34 +271,22 @@ mintButton.onclick = async () => {
 
     "<br><br>" +
 
-    "<b>Collection Transaction:</b><br>" +
+    "<b>Next:</b><br>" +
 
-    "<a target='_blank' href='https://explorer.solana.com/tx/" +
-    collectionSignature +
-    "?cluster=devnet'>" +
-
-    "View Collection Transaction" +
-
-    "</a>";
-
+    "Send the Asset address to continue.";
 
     console.log(
-      "MITHRA #003 CREATED"
+      "ANAHITA #004 CREATED"
     );
 
     console.log(
-      "Asset:",
+      "ASSET:",
       assetAddress
     );
 
     console.log(
-      "Mint:",
+      "MINT:",
       mintSignature
-    );
-
-    console.log(
-      "Collection:",
-      collectionSignature
     );
 
 
@@ -496,19 +295,13 @@ mintButton.onclick = async () => {
     console.error(error);
 
 
-    /*
-      IMPORTANT:
-      If Mint already succeeded, never tell the user
-      to Mint again.
-    */
-
     if (assetAddress) {
 
       status.innerHTML =
 
       "<strong>Asset Minted</strong><br><br>" +
 
-      "Mithra #003 may already exist.<br><br>" +
+      "Anahita #004 may already exist.<br><br>" +
 
       "<b>Asset:</b><br>" +
       assetAddress +
@@ -529,9 +322,7 @@ mintButton.onclick = async () => {
 
         : "") +
 
-      "<b>Do NOT Mint Again.</b><br>" +
-
-      "Send this Asset address to continue the Collection step.";
+      "<b>DO NOT MINT AGAIN.</b>";
 
     } else {
 
