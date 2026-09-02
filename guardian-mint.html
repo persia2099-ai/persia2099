@@ -1,308 +1,300 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Persia 2099 — Rostam X #005</title>
-<style>
-body{margin:0;background:#090909;color:white;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.box{width:90%;max-width:420px;text-align:center;padding:30px;border:1px solid #333;border-radius:16px;background:#111}
-img{width:100%;border-radius:12px;margin-bottom:20px}
-button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;cursor:pointer;font-size:16px;font-weight:bold}
-#connect{background:white;color:black}
-#mint{background:#9945ff;color:white}
-button:disabled{opacity:.5}
-#status{margin-top:20px;word-break:break-word;line-height:1.5}
-a{color:#9945ff}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rostam X #005 — Collection</title>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "@metaplex-foundation/umi": "https://esm.sh/@metaplex-foundation/umi@1.4.1",
+      "@metaplex-foundation/mpl-core": "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0",
+      "@metaplex-foundation/umi-bundle-defaults": "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1",
+      "@metaplex-foundation/umi-signer-wallet-adapters": "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1",
+      "@solana/wallet-adapter-phantom": "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28"
+    }
+  }
+  </script>
+
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #080808;
+      color: white;
+      text-align: center;
+      padding: 30px;
+    }
+
+    button {
+      padding: 14px 25px;
+      margin: 10px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+    }
+
+    #connect {
+      background: #9945FF;
+      color: white;
+    }
+
+    #attach {
+      background: #14F195;
+      color: black;
+      display: none;
+    }
+
+    #status {
+      margin-top: 20px;
+      line-height: 1.7;
+      word-break: break-word;
+    }
+
+    .box {
+      max-width: 600px;
+      margin: auto;
+      padding: 25px;
+      border: 1px solid #333;
+      border-radius: 15px;
+    }
+
+    code {
+      display: block;
+      background: #151515;
+      padding: 12px;
+      margin: 10px 0;
+      border-radius: 8px;
+      word-break: break-all;
+    }
+
+    a {
+      color: #14F195;
+    }
+  </style>
 </head>
 
 <body>
+
 <div class="box">
 
-<h1>Persia 2099</h1>
+  <h1>ROSTAM X</h1>
+  <h2>#005</h2>
 
-<h2>Rostam X — #005</h2>
+  <p>Attach existing Asset to Genesis Guardians Collection</p>
 
-<img
-src="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeifoad3tv6fw3qjsxxomeewv62p2wudqaomjzw5qj4t6hkqc37zsci"
-alt="Rostam X"
->
+  <p>Asset:</p>
+  <code id="assetAddress">
+    9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS
+  </code>
 
-<button id="connect">Connect Phantom</button>
+  <p>Collection:</p>
+  <code id="collectionAddress">
+    6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a
+  </code>
 
-<button id="mint" disabled>
-Mint Rostam X #005 — Devnet
-</button>
+  <button id="connect">Connect Phantom</button>
 
-<div id="status">
-Wallet not connected.
-</div>
+  <button id="attach">
+    ADD ROSTAM TO COLLECTION
+  </button>
+
+  <div id="status"></div>
 
 </div>
 
 <script type="module">
 
 import {
-createUmi
-} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+  createUmi,
+  publicKey
+} from "@metaplex-foundation/umi";
 
 import {
-generateSigner,
-publicKey
-} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+  mplCore,
+  update,
+  fetchAsset,
+  fetchCollection,
+  updateAuthority,
+  collectionAddress
+} from "@metaplex-foundation/mpl-core";
 
 import {
-create,
-mplCore,
-fetchAsset
-} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
+  walletAdapterIdentity
+} from "@metaplex-foundation/umi-signer-wallet-adapters";
 
 import {
-walletAdapterIdentity
-} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
+  PhantomWalletAdapter
+} from "@solana/wallet-adapter-phantom";
 
-import {
-PhantomWalletAdapter
-} from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+const RPC = "https://api.devnet.solana.com";
 
-import {
-base58
-} from "https://esm.sh/@metaplex-foundation/umi@1.4.1/serializers";
+const ASSET =
+  "9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS";
 
-const RPC =
-"https://api.devnet.solana.com";
+const COLLECTION =
+  "6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
 
-const METADATA_URI =
-"https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreia3k2n5exxiuzkbxvzekdcfjrir7hlgfint7tkkjkcinj3daogysu";
+const wallet = new PhantomWalletAdapter();
 
-const umi =
-createUmi(RPC)
-.use(mplCore());
+let umi;
 
-const wallet =
-new PhantomWalletAdapter();
+const connectBtn =
+  document.getElementById("connect");
+
+const attachBtn =
+  document.getElementById("attach");
 
 const status =
-document.getElementById("status");
+  document.getElementById("status");
 
-const connectButton =
-document.getElementById("connect");
-
-const mintButton =
-document.getElementById("mint");
-
-connectButton.onclick = async () => {
-
-try {
-
-status.innerText =
-"Connecting Phantom...";
-
-await wallet.connect();
-
-umi.use(
-walletAdapterIdentity(wallet)
-);
-
-status.innerText =
-"Connected:\n\n" +
-wallet.publicKey.toBase58();
-
-connectButton.innerText =
-"Phantom Connected";
-
-mintButton.disabled = false;
-
-} catch(error) {
-
-console.error(error);
-
-status.innerText =
-"Connection failed:\n\n" +
-(error?.message || error);
-
+function show(message) {
+  status.innerHTML = message;
 }
 
+connectBtn.onclick = async () => {
+
+  try {
+
+    show("Connecting Phantom...");
+
+    await wallet.connect();
+
+    umi = createUmi(RPC)
+      .use(mplCore())
+      .use(walletAdapterIdentity(wallet));
+
+    show(
+      "✅ Phantom connected<br><br>" +
+      "Wallet:<br>" +
+      wallet.publicKey.toBase58()
+    );
+
+    attachBtn.style.display = "inline-block";
+
+  } catch (error) {
+
+    console.error(error);
+
+    show(
+      "❌ Connection failed<br><br>" +
+      error.message
+    );
+  }
 };
 
-mintButton.onclick = async () => {
 
-let assetAddress = null;
-let signature = null;
+attachBtn.onclick = async () => {
 
-try {
+  try {
 
-mintButton.disabled = true;
+    attachBtn.disabled = true;
 
-status.innerText =
-"Preparing Rostam X #005...\n\n" +
-"Please confirm the transaction in Phantom.";
+    show("🔎 Checking Rostam Asset...");
 
-const asset =
-generateSigner(umi);
+    const asset = await fetchAsset(
+      umi,
+      publicKey(ASSET)
+    );
 
-assetAddress =
-asset.publicKey.toString();
+    show(
+      "✅ Rostam Asset found.<br><br>" +
+      "Checking Collection..."
+    );
 
-const latestBlockhash =
-await umi.rpc.getLatestBlockhash();
+    const collection = await fetchCollection(
+      umi,
+      publicKey(COLLECTION)
+    );
 
-const result =
-await create(umi, {
+    /*
+      Check whether Rostam is already
+      inside a collection.
+    */
 
-asset,
+    const currentCollection =
+      collectionAddress(asset);
 
-name:
-"Rostam X",
+    if (currentCollection) {
 
-uri:
-METADATA_URI
+      if (
+        currentCollection.toString() ===
+        COLLECTION
+      ) {
 
-}).sendAndConfirm(umi, {
+        show(
+          "✅ Rostam #005 is ALREADY connected to the Genesis Guardians Collection."
+        );
 
-send:{
-skipPreflight:false
-},
+        attachBtn.disabled = false;
 
-confirm:{
-strategy:{
-type:"blockhash",
-blockhash:
-latestBlockhash.blockhash,
-lastValidBlockHeight:
-latestBlockhash.lastValidBlockHeight
-}
-}
+        return;
+      }
 
-});
+      show(
+        "⚠️ Rostam already belongs to another Collection.<br><br>" +
+        currentCollection.toString()
+      );
 
-signature =
-base58.deserialize(
-result.signature
-)[0];
+      attachBtn.disabled = false;
 
-status.innerText =
-"Verifying transaction on Devnet...";
+      return;
+    }
 
-let verifiedAsset = null;
 
-for(let i=0;i<10;i++){
+    show(
+      "🔗 Connecting Rostam #005 to Collection...<br><br>" +
+      "Please confirm the transaction in Phantom."
+    );
 
-try{
 
-verifiedAsset =
-await fetchAsset(
-umi,
-publicKey(assetAddress)
-);
+    const result = await update(umi, {
 
-if(verifiedAsset) break;
+      asset,
 
-}catch(e){
+      newCollection:
+        collection.publicKey,
 
-console.log(
-"Verification attempt",
-i+1,
-e
-);
+      newUpdateAuthority:
+        updateAuthority(
+          "Collection",
+          [collection.publicKey]
+        )
 
-}
+    }).sendAndConfirm(umi);
 
-await new Promise(
-resolve =>
-setTimeout(resolve,2000)
-);
 
-}
+    const signature =
+      umi
+        .transactions
+        .deserialize(result.signature);
 
-if(!verifiedAsset){
 
-status.innerHTML =
-"<strong>TRANSACTION SENT</strong><br><br>" +
+    show(
+      "🎉 SUCCESS!<br><br>" +
+      "Rostam X #005 is now connected to<br>" +
+      "Persia 2099 — GENESIS GUARDIANS.<br><br>" +
 
-"The transaction was submitted, " +
-"but the Asset could not yet be verified.<br><br>" +
+      `<a target="_blank"
+      href="https://explorer.solana.com/tx/${result.signature}?cluster=devnet">
+      View Collection Transaction
+      </a>`
+    );
 
-"<b>Asset:</b><br>" +
-assetAddress +
+    attachBtn.innerText = "CONNECTED ✓";
 
-"<br><br>" +
+  } catch (error) {
 
-"<b>Transaction:</b><br>" +
+    console.error(error);
 
-"<a target='_blank' href='https://explorer.solana.com/tx/" +
-signature +
-"?cluster=devnet'>" +
+    show(
+      "❌ Collection connection failed:<br><br>" +
+      error.message
+    );
 
-"Check on Solana Explorer" +
-
-"</a><br><br>" +
-
-"<b>DO NOT MINT AGAIN YET.</b>";
-
-mintButton.disabled = false;
-
-return;
-
-}
-
-status.innerHTML =
-"<strong>SUCCESS!</strong><br><br>" +
-
-"Rostam X #005 was successfully created on Devnet." +
-
-"<br><br>" +
-
-"<b>Asset:</b><br>" +
-assetAddress +
-
-"<br><br>" +
-
-"<b>Mint Transaction:</b><br>" +
-
-"<a target='_blank' href='https://explorer.solana.com/tx/" +
-signature +
-"?cluster=devnet'>" +
-
-"View Mint Transaction" +
-
-"</a>" +
-
-"<br><br>" +
-
-"Send this Asset address to continue the Collection step.";
-
-console.log(
-"ROSTAM X #005 VERIFIED"
-);
-
-console.log(
-"ASSET:",
-assetAddress
-);
-
-console.log(
-"SIGNATURE:",
-signature
-);
-
-}catch(error){
-
-console.error(error);
-
-status.innerHTML =
-"<strong>Mint failed.</strong><br><br>" +
-
-(error?.message || error) +
-
-"<br><br>" +
-
-"No SUCCESS message was issued.";
-
-mintButton.disabled = false;
-
-}
+    attachBtn.disabled = false;
+  }
 
 };
 
