@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Rostam X #005 — Attach</title>
+
+<script type="importmap">
+{
+  "imports": {
+    "@metaplex-foundation/umi": "https://esm.sh/@metaplex-foundation/umi@1.4.1",
+    "@metaplex-foundation/umi-bundle-defaults": "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1",
+    "@metaplex-foundation/umi-signer-wallet-adapters": "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1",
+    "@metaplex-foundation/mpl-core": "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0"
+  }
+}
+</script>
+
+<style>
+body {
+  background:#080808;
+  color:white;
+  font-family:Arial,sans-serif;
+  text-align:center;
+  padding:30px 15px;
+}
+
+.box {
+  max-width:600px;
+  margin:auto;
+  padding:25px;
+  border:1px solid #333;
+  border-radius:15px;
+}
+
+button {
+  padding:15px 25px;
+  margin:10px;
+  border:0;
+  border-radius:8px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+#connect {
+  background:#9945FF;
+  color:white;
+}
+
+#attach {
+  background:#14F195;
+  color:black;
+  display:none;
+}
+
+code {
+  display:block;
+  background:#151515;
+  padding:12px;
+  margin:10px 0 20px;
+  border-radius:8px;
+  word-break:break-all;
+}
+
+#status {
+  margin-top:25px;
+  line-height:1.7;
+  word-break:break-word;
+}
+
+a {
+  color:#14F195;
+}
+</style>
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>ROSTAM X</h1>
+<h2>#005</h2>
+
+<p>Attach existing Asset to Genesis Guardians Collection</p>
+
+<p>Asset Address</p>
+
+<code>
+9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS
+</code>
+
+<p>Collection Address</p>
+
+<code>
+6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a
+</code>
+
+<button id="connect">
+Connect Phantom
+</button>
+
+<button id="attach">
+Connect Rostam to Collection
+</button>
+
+<div id="status"></div>
+
+</div>
+
+<script type="module">
+
+import { createUmi, publicKey } 
+from "@metaplex-foundation/umi";
+
+import { createUmi as createUmiDefaults }
+from "@metaplex-foundation/umi-bundle-defaults";
+
+import {
+  mplCore,
+  fetchAsset,
+  fetchCollection,
+  update,
+  updateAuthority,
+  collectionAddress
+}
+from "@metaplex-foundation/mpl-core";
+
+import {
+  walletAdapterIdentity
+}
+from "@metaplex-foundation/umi-signer-wallet-adapters";
+
+import {
+  PhantomWalletAdapter
+}
+from "@solana/wallet-adapter-phantom";
+
+
+const RPC = "https://api.devnet.solana.com";
+
+const ASSET = publicKey(
+  "9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS"
+);
+
+const COLLECTION = publicKey(
+  "6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a"
+);
+
+const wallet = new PhantomWalletAdapter();
+
+let umi = null;
+
+
+const connectButton =
+document.getElementById("connect");
+
+const attachButton =
+document.getElementById("attach");
+
+const status =
+document.getElementById("status");
+
+
+function show(text) {
+  status.innerHTML = text;
+}
+
+
+connectButton.onclick = async () => {
+
+  try {
+
+    show("🔄 Connecting Phantom...");
+
+    await wallet.connect();
+
+    umi = createUmiDefaults(RPC)
+      .use(mplCore())
+      .use(walletAdapterIdentity(wallet));
+
+    show(
+      "✅ Phantom connected<br><br>" +
+      "Wallet:<br>" +
+      wallet.publicKey.toBase58()
+    );
+
+    attachButton.style.display = "inline-block";
+
+  } catch (error) {
+
+    console.error(error);
+
+    show(
+      "❌ Connection failed<br><br>" +
+      error.message
+    );
+
+  }
+
+};
+
+
+attachButton.onclick = async () => {
+
+  try {
+
+    attachButton.disabled = true;
+
+    show("🔎 Checking Rostam Asset...");
+
+    const asset =
+      await fetchAsset(umi, ASSET);
+
+
+    show(
+      "✅ Rostam #005 found.<br><br>" +
+      "Checking Collection..."
+    );
+
+
+    const collection =
+      await fetchCollection(
+        umi,
+        COLLECTION
+      );
+
+
+    const existingCollection =
+      collectionAddress(asset);
+
+
+    if (existingCollection) {
+
+      if (
+        existingCollection.toString() ===
+        COLLECTION.toString()
+      ) {
+
+        show(
+          "✅ Rostam #005 is already connected to the Collection."
+        );
+
+        attachButton.innerText =
+          "CONNECTED ✓";
+
+        return;
+
+      }
+
+
+      show(
+        "⚠️ This Asset already belongs to another Collection:<br><br>" +
+        existingCollection.toString()
+      );
+
+      attachButton.disabled = false;
+
+      return;
+    }
+
+
+    show(
+      "🔗 Ready to connect Rostam #005.<br><br>" +
+      "Confirm the transaction in Phantom..."
+    );
+
+
+    const result =
+      await update(umi, {
+
+        asset: asset,
+
+        newCollection:
+          collection.publicKey,
+
+        newUpdateAuthority:
+          updateAuthority(
+            "Collection",
+            [collection.publicKey]
+          )
+
+      }).sendAndConfirm(umi);
+
+
+    show(
+      "🎉 SUCCESS!<br><br>" +
+      "Rostam X #005 is now connected to<br>" +
+      "Persia 2099 — GENESIS GUARDIANS.<br><br>" +
+
+      "<a target='_blank' href='" +
+      "https://explorer.solana.com/tx/" +
+      result.signature +
+      "?cluster=devnet'>" +
+
+      "View Transaction on Solana Explorer" +
+
+      "</a>"
+    );
+
+
+    attachButton.innerText =
+      "CONNECTED ✓";
+
+  } catch (error) {
+
+    console.error(error);
+
+    show(
+      "❌ Attach failed<br><br>" +
+      error.message
+    );
+
+    attachButton.disabled = false;
+
+  }
+
+};
+
+</script>
+
+</body>
+</html>
