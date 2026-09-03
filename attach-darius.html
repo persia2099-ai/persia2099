@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0">
+
+<title>Persia 2099 — Attach Darius</title>
+
+<script type="importmap">
+{
+  "imports": {
+    "@metaplex-foundation/umi":
+      "https://esm.sh/@metaplex-foundation/umi@1.4.1",
+
+    "@metaplex-foundation/umi-bundle-defaults":
+      "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1",
+
+    "@metaplex-foundation/mpl-core":
+      "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1",
+
+    "@metaplex-foundation/umi-signer-wallet-adapters":
+      "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1",
+
+    "@solana/wallet-adapter-phantom":
+      "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28"
+  }
+}
+</script>
+
+<style>
+
+* {
+  box-sizing:border-box;
+}
+
+body {
+  background:#080808;
+  color:#fff;
+  font-family:Arial,sans-serif;
+  text-align:center;
+  padding:30px 15px;
+}
+
+.box {
+  width:100%;
+  max-width:650px;
+  margin:auto;
+  border:1px solid #333;
+  border-radius:15px;
+  padding:25px 20px;
+}
+
+h1 {
+  margin-bottom:8px;
+}
+
+h2 {
+  font-weight:normal;
+  margin-top:0;
+}
+
+p {
+  line-height:1.6;
+}
+
+button {
+  padding:15px 24px;
+  margin:12px 5px;
+  border:0;
+  border-radius:8px;
+  font-size:16px;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+#connect {
+  background:#9945ff;
+  color:white;
+}
+
+#attach {
+  background:#14f195;
+  color:#000;
+  display:none;
+}
+
+#status {
+  margin-top:25px;
+  line-height:1.8;
+  word-break:break-word;
+}
+
+.address {
+  background:#151515;
+  padding:12px;
+  border-radius:8px;
+  word-break:break-all;
+  font-size:13px;
+  margin:10px 0;
+}
+
+a {
+  color:#14f195;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div class="box">
+
+<h1>Persia 2099</h1>
+
+<h2>GENESIS GUARDIANS</h2>
+
+<p>
+<strong>Darius Zero — Guardian #006</strong>
+</p>
+
+<p>Asset Address</p>
+
+<div class="address">
+sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F
+</div>
+
+<p>Collection Address</p>
+
+<div class="address">
+6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a
+</div>
+
+<button id="connect">
+Connect Phantom
+</button>
+
+<button id="attach">
+CONNECT DARIUS #006 TO COLLECTION
+</button>
+
+<div id="status"></div>
+
+</div>
+
+
+<script type="module">
+
+import {
+  publicKey
+}
+from "@metaplex-foundation/umi";
+
+
+import {
+  createUmi
+}
+from "@metaplex-foundation/umi-bundle-defaults";
+
+
+import {
+  mplCore,
+  fetchAsset,
+  fetchCollection,
+  update,
+  updateAuthority
+}
+from "@metaplex-foundation/mpl-core";
+
+
+import {
+  walletAdapterIdentity
+}
+from "@metaplex-foundation/umi-signer-wallet-adapters";
+
+
+import {
+  PhantomWalletAdapter
+}
+from "@solana/wallet-adapter-phantom";
+
+
+const RPC =
+"https://api.devnet.solana.com";
+
+
+const ASSET =
+publicKey(
+  "sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F"
+);
+
+
+const COLLECTION =
+publicKey(
+  "6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a"
+);
+
+
+const wallet =
+new PhantomWalletAdapter();
+
+
+let umi = null;
+
+
+const connectButton =
+document.getElementById("connect");
+
+
+const attachButton =
+document.getElementById("attach");
+
+
+const status =
+document.getElementById("status");
+
+
+function show(message) {
+
+  status.innerHTML = message;
+
+}
+
+
+connectButton.onclick =
+async function() {
+
+  try {
+
+    show(
+      "🔄 Connecting Phantom..."
+    );
+
+
+    await wallet.connect();
+
+
+    umi =
+      createUmi(RPC)
+      .use(mplCore())
+      .use(
+        walletAdapterIdentity(wallet)
+      );
+
+
+    show(
+
+      "✅ Phantom connected<br><br>" +
+
+      "<div class='address'>" +
+
+      wallet.publicKey.toString() +
+
+      "</div>"
+
+    );
+
+
+    connectButton.style.display =
+      "none";
+
+
+    attachButton.style.display =
+      "inline-block";
+
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+
+    show(
+
+      "❌ Connection failed<br><br>" +
+
+      error.message
+
+    );
+
+  }
+
+};
+
+
+attachButton.onclick =
+async function() {
+
+  try {
+
+    attachButton.disabled = true;
+
+
+    attachButton.innerText =
+      "CONNECTING...";
+
+
+    show(
+
+      "🔎 Checking Darius Zero #006..."
+
+    );
+
+
+    const asset =
+      await fetchAsset(
+        umi,
+        ASSET
+      );
+
+
+    show(
+
+      "✅ Darius Zero #006 found.<br><br>" +
+
+      "🔎 Checking Genesis Guardians Collection..."
+
+    );
+
+
+    const collection =
+      await fetchCollection(
+        umi,
+        COLLECTION
+      );
+
+
+    show(
+
+      "🔗 Darius is ready.<br><br>" +
+
+      "Please confirm the transaction in Phantom..."
+
+    );
+
+
+    const result =
+      await update(
+        umi,
+        {
+
+          asset: asset,
+
+          newCollection:
+            collection.publicKey,
+
+          newUpdateAuthority:
+            updateAuthority(
+              "Collection",
+              [collection.publicKey]
+            )
+
+        }
+      ).sendAndConfirm(umi);
+
+
+    show(
+
+      "🎉 <strong>SUCCESS!</strong><br><br>" +
+
+      "<strong>Darius Zero #006</strong><br>" +
+
+      "is now connected to<br>" +
+
+      "<strong>Persia 2099 — GENESIS GUARDIANS</strong>" +
+
+      "<br><br>" +
+
+      "<a target='_blank' href='" +
+
+      "https://explorer.solana.com/address/" +
+
+      ASSET.toString() +
+
+      "?cluster=devnet'>" +
+
+      "🔎 View Darius Asset" +
+
+      "</a>" +
+
+      "<br><br>" +
+
+      "<a target='_blank' href='" +
+
+      "https://explorer.solana.com/tx/" +
+
+      result.signature +
+
+      "?cluster=devnet'>" +
+
+      "🔗 View Collection Transaction" +
+
+      "</a>"
+
+    );
+
+
+    attachButton.innerText =
+      "CONNECTED ✓";
+
+
+  }
+
+  catch(error) {
+
+    console.error(error);
+
+
+    show(
+
+      "❌ Attach failed<br><br>" +
+
+      error.message
+
+    );
+
+
+    attachButton.disabled = false;
+
+
+    attachButton.innerText =
+      "CONNECT DARIUS #006 TO COLLECTION";
+
+  }
+
+};
+
+</script>
+
+</body>
+</html>
