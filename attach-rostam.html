@@ -10,8 +10,9 @@
   "imports": {
     "@metaplex-foundation/umi": "https://esm.sh/@metaplex-foundation/umi@1.4.1",
     "@metaplex-foundation/umi-bundle-defaults": "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1",
+    "@metaplex-foundation/mpl-core": "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0",
     "@metaplex-foundation/umi-signer-wallet-adapters": "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1",
-    "@metaplex-foundation/mpl-core": "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0"
+    "@solana/wallet-adapter-phantom": "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28"
   }
 }
 </script>
@@ -84,24 +85,14 @@ a {
 <p>Attach existing Asset to Genesis Guardians Collection</p>
 
 <p>Asset Address</p>
-
-<code>
-9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS
-</code>
+<code>9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS</code>
 
 <p>Collection Address</p>
+<code>6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a</code>
 
-<code>
-6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a
-</code>
+<button id="connect">Connect Phantom</button>
 
-<button id="connect">
-Connect Phantom
-</button>
-
-<button id="attach">
-Connect Rostam to Collection
-</button>
+<button id="attach">Connect Rostam to Collection</button>
 
 <div id="status"></div>
 
@@ -109,7 +100,7 @@ Connect Rostam to Collection
 
 <script type="module">
 
-import { createUmi, publicKey } 
+import { createUmi, publicKey }
 from "@metaplex-foundation/umi";
 
 import { createUmi as createUmiDefaults }
@@ -120,8 +111,7 @@ import {
   fetchAsset,
   fetchCollection,
   update,
-  updateAuthority,
-  collectionAddress
+  updateAuthority
 }
 from "@metaplex-foundation/mpl-core";
 
@@ -150,15 +140,14 @@ const wallet = new PhantomWalletAdapter();
 
 let umi = null;
 
-
 const connectButton =
-document.getElementById("connect");
+  document.getElementById("connect");
 
 const attachButton =
-document.getElementById("attach");
+  document.getElementById("attach");
 
 const status =
-document.getElementById("status");
+  document.getElementById("status");
 
 
 function show(text) {
@@ -166,7 +155,7 @@ function show(text) {
 }
 
 
-connectButton.onclick = async () => {
+connectButton.addEventListener("click", async () => {
 
   try {
 
@@ -181,7 +170,7 @@ connectButton.onclick = async () => {
     show(
       "✅ Phantom connected<br><br>" +
       "Wallet:<br>" +
-      wallet.publicKey.toBase58()
+      wallet.publicKey.toString()
     );
 
     attachButton.style.display = "inline-block";
@@ -197,89 +186,51 @@ connectButton.onclick = async () => {
 
   }
 
-};
+});
 
 
-attachButton.onclick = async () => {
+attachButton.addEventListener("click", async () => {
 
   try {
 
     attachButton.disabled = true;
 
-    show("🔎 Checking Rostam Asset...");
+    show("🔎 Checking Rostam #005...");
 
-    const asset =
-      await fetchAsset(umi, ASSET);
-
+    const asset = await fetchAsset(
+      umi,
+      ASSET
+    );
 
     show(
       "✅ Rostam #005 found.<br><br>" +
       "Checking Collection..."
     );
 
-
-    const collection =
-      await fetchCollection(
-        umi,
-        COLLECTION
-      );
-
-
-    const existingCollection =
-      collectionAddress(asset);
-
-
-    if (existingCollection) {
-
-      if (
-        existingCollection.toString() ===
-        COLLECTION.toString()
-      ) {
-
-        show(
-          "✅ Rostam #005 is already connected to the Collection."
-        );
-
-        attachButton.innerText =
-          "CONNECTED ✓";
-
-        return;
-
-      }
-
-
-      show(
-        "⚠️ This Asset already belongs to another Collection:<br><br>" +
-        existingCollection.toString()
-      );
-
-      attachButton.disabled = false;
-
-      return;
-    }
-
-
-    show(
-      "🔗 Ready to connect Rostam #005.<br><br>" +
-      "Confirm the transaction in Phantom..."
+    const collection = await fetchCollection(
+      umi,
+      COLLECTION
     );
 
+    show(
+      "🔗 Rostam is ready to be connected.<br><br>" +
+      "Please confirm in Phantom..."
+    );
 
-    const result =
-      await update(umi, {
+    const result = await update(umi, {
 
-        asset: asset,
+      asset,
 
-        newCollection:
-          collection.publicKey,
+      newCollection:
+        collection.publicKey,
 
-        newUpdateAuthority:
-          updateAuthority(
-            "Collection",
-            [collection.publicKey]
-          )
+      newUpdateAuthority:
+        updateAuthority(
+          "Collection",
+          [collection.publicKey]
+        )
 
-      }).sendAndConfirm(umi);
+    }).sendAndConfirm(umi);
 
 
     show(
@@ -297,9 +248,7 @@ attachButton.onclick = async () => {
       "</a>"
     );
 
-
-    attachButton.innerText =
-      "CONNECTED ✓";
+    attachButton.innerText = "CONNECTED ✓";
 
   } catch (error) {
 
@@ -314,7 +263,7 @@ attachButton.onclick = async () => {
 
   }
 
-};
+});
 
 </script>
 
