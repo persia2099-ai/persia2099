@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Persia 2099 — Guardian Mint</title>
 
 <script type="importmap">
@@ -10,14 +11,19 @@
   "imports": {
     "@metaplex-foundation/umi": "https://esm.sh/@metaplex-foundation/umi@1.4.1",
     "@metaplex-foundation/umi-bundle-defaults": "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1",
-    "@metaplex-foundation/mpl-core": "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0",
-    "@metaplex-foundation/umi-signer-wallet-adapters": "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1",
+    "@metaplex-foundation/mpl-core": "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1",
+    "@metaplex-foundation/umi-signer-wallet-adapters": "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1",
     "@solana/wallet-adapter-phantom": "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28"
   }
 }
 </script>
 
 <style>
+
+* {
+  box-sizing: border-box;
+}
+
 body {
   background:#080808;
   color:#fff;
@@ -27,29 +33,45 @@ body {
 }
 
 .box {
+  width:100%;
   max-width:650px;
   margin:auto;
   border:1px solid #333;
   border-radius:15px;
-  padding:25px;
+  padding:25px 20px;
+}
+
+h1 {
+  margin-bottom:10px;
+}
+
+h2 {
+  margin-top:0;
+  font-weight:normal;
+}
+
+p {
+  line-height:1.6;
 }
 
 input {
-  width:90%;
-  padding:13px;
+  width:100%;
+  padding:15px;
   margin:8px 0;
   border-radius:8px;
   border:1px solid #444;
   background:#111;
   color:#fff;
+  font-size:15px;
 }
 
 button {
-  padding:14px 24px;
-  margin:10px;
+  padding:15px 24px;
+  margin:12px 5px;
   border:0;
   border-radius:8px;
   font-size:16px;
+  font-weight:bold;
   cursor:pointer;
 }
 
@@ -66,13 +88,28 @@ button {
 
 #status {
   margin-top:20px;
-  line-height:1.7;
+  line-height:1.8;
   word-break:break-word;
+}
+
+#mintForm {
+  display:none;
+  margin-top:20px;
+}
+
+.address {
+  background:#151515;
+  padding:12px;
+  border-radius:8px;
+  word-break:break-all;
+  font-size:13px;
+  margin:10px 0;
 }
 
 a {
   color:#14f195;
 }
+
 </style>
 </head>
 
@@ -81,60 +118,72 @@ a {
 <div class="box">
 
 <h1>Persia 2099</h1>
+
 <h2>GENESIS GUARDIANS</h2>
 
-<p>Darius Zero — Guardian #006</p>
+<p>
+<strong>Darius Zero — Guardian #006</strong>
+</p>
 
-<button id="connect">Connect Phantom</button>
+<button id="connect">
+Connect Phantom
+</button>
 
-<div id="form" style="display:none;">
+<div id="status"></div>
+
+<div id="mintForm">
 
 <input
 id="name"
+type="text"
 value="Darius Zero"
-placeholder="NFT Name">
+placeholder="NFT Name"
+>
 
 <input
 id="number"
+type="text"
 value="006"
-placeholder="Guardian Number">
+placeholder="Guardian Number"
+>
 
 <input
 id="uri"
+type="text"
 value="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreihubppse6kojxs4xjpey5xgs6lkpvwarict7xfb4nqhfghdlxzqgy"
-placeholder="Metadata URI">
+placeholder="Metadata URI"
+>
 
-<button id="mint">MINT DARIUS #006</button>
+<button id="mint">
+MINT DARIUS #006
+</button>
 
 </div>
-
-<div id="status"></div>
 
 </div>
 
 <script type="module">
 
-import { publicKey }
-from "@metaplex-foundation/umi";
+import {
+  generateSigner
+} from "@metaplex-foundation/umi";
 
-import { createUmi }
-from "@metaplex-foundation/umi-bundle-defaults";
+import {
+  createUmi
+} from "@metaplex-foundation/umi-bundle-defaults";
 
 import {
   mplCore,
   create
-}
-from "@metaplex-foundation/mpl-core";
+} from "@metaplex-foundation/mpl-core";
 
 import {
   walletAdapterIdentity
-}
-from "@metaplex-foundation/umi-signer-wallet-adapters";
+} from "@metaplex-foundation/umi-signer-wallet-adapters";
 
 import {
   PhantomWalletAdapter
-}
-from "@solana/wallet-adapter-phantom";
+} from "@solana/wallet-adapter-phantom";
 
 
 const RPC = "https://api.devnet.solana.com";
@@ -143,25 +192,28 @@ const wallet = new PhantomWalletAdapter();
 
 let umi = null;
 
+
 const connectButton =
 document.getElementById("connect");
 
 const mintButton =
 document.getElementById("mint");
 
-const form =
-document.getElementById("form");
+const mintForm =
+document.getElementById("mintForm");
 
 const status =
 document.getElementById("status");
 
 
 function show(message) {
+
   status.innerHTML = message;
+
 }
 
 
-connectButton.onclick = async () => {
+connectButton.onclick = async function() {
 
   try {
 
@@ -175,13 +227,20 @@ connectButton.onclick = async () => {
 
     show(
       "✅ Phantom connected<br><br>" +
-      wallet.publicKey.toString()
+      "<div class='address'>" +
+      wallet.publicKey.toString() +
+      "</div>"
     );
 
-    form.style.display = "block";
     connectButton.style.display = "none";
 
-  } catch (error) {
+    mintForm.style.display = "block";
+
+    mintButton.style.display = "inline-block";
+
+  }
+
+  catch(error) {
 
     console.error(error);
 
@@ -195,21 +254,71 @@ connectButton.onclick = async () => {
 };
 
 
-mintButton.onclick = async () => {
+mintButton.onclick = async function() {
 
   try {
 
     mintButton.disabled = true;
 
-    show("⏳ Creating Darius Zero #006...");
+    mintButton.innerText = "MINTING...";
+
+    show(
+      "⏳ Creating Darius Zero #006...<br><br>" +
+      "Please confirm the transaction in Phantom."
+    );
+
 
     const name =
-      document.getElementById("name").value.trim();
+    document.getElementById("name")
+      .value
+      .trim();
+
+
+    const number =
+    document.getElementById("number")
+      .value
+      .trim();
+
 
     const uri =
-      document.getElementById("uri").value.trim();
+    document.getElementById("uri")
+      .value
+      .trim();
 
-    const asset = await create(umi, {
+
+    if (!name) {
+
+      throw new Error("NFT name is empty.");
+
+    }
+
+
+    if (!uri) {
+
+      throw new Error("Metadata URI is empty.");
+
+    }
+
+
+    /*
+      Create a completely new Asset signer.
+      This is required for a new Core Asset.
+    */
+
+    const assetSigner =
+    generateSigner(umi);
+
+
+    show(
+      "⏳ Minting Darius Zero #006...<br><br>" +
+      "Asset is being created on Solana Devnet."
+    );
+
+
+    const result =
+    await create(umi, {
+
+      asset: assetSigner,
 
       name: name,
 
@@ -219,50 +328,74 @@ mintButton.onclick = async () => {
 
 
     const assetAddress =
-      asset.publicKey.toString();
+    assetSigner.publicKey.toString();
 
 
     show(
-      "🎉 MINT SUCCESSFUL!<br><br>" +
 
-      "<b>Darius Zero #006</b><br><br>" +
+      "🎉 <strong>MINT SUCCESSFUL!</strong><br><br>" +
+
+      "<strong>Darius Zero #006</strong><br><br>" +
 
       "Asset Address:<br>" +
-      "<code>" +
+
+      "<div class='address'>" +
       assetAddress +
-      "</code><br><br>" +
+      "</div>" +
+
+      "<br>" +
 
       "<a target='_blank' href='" +
+
       "https://explorer.solana.com/address/" +
+
       assetAddress +
+
       "?cluster=devnet'>" +
 
-      "View Asset on Solana Explorer" +
+      "🔎 View Asset on Solana Explorer" +
 
-      "</a><br><br>" +
+      "</a>" +
+
+      "<br><br>" +
 
       "<a target='_blank' href='" +
-      "https://explorer.solana.com/address/" +
-      assetAddress +
+
+      "https://explorer.solana.com/tx/" +
+
+      result.signature +
+
       "?cluster=devnet'>" +
 
-      "Verify Asset" +
+      "🔗 View Mint Transaction" +
 
       "</a>"
+
     );
 
-    mintButton.innerText = "MINTED ✓";
 
-  } catch (error) {
+    mintButton.innerText =
+    "MINTED ✓";
+
+
+  }
+
+  catch(error) {
 
     console.error(error);
 
     show(
+
       "❌ Mint failed<br><br>" +
+
       error.message
+
     );
 
     mintButton.disabled = false;
+
+    mintButton.innerText =
+    "MINT DARIUS #006";
 
   }
 
