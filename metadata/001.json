@@ -1,0 +1,24 @@
+{
+  "name": "Arash 2099",
+  "symbol": "P2099",
+  "description": "Arash 2099 — The Cyber Warrior. Guardian #001 of the Persia 2099 Genesis Guardians.",
+  "image": "https://persia2099-ai.github.io/persia2099/arash-2099.png",
+  "attributes": [
+    {
+      "trait_type": "Guardian",
+      "value": "Arash 2099"
+    },
+    {
+      "trait_type": "Generation",
+      "value": "Genesis"
+    },
+    {
+      "trait_type": "Guardian Number",
+      "value": "001"
+    },
+    {
+      "trait_type": "Universe",
+      "value": "Persia 2099"
+    }
+  ]
+}
