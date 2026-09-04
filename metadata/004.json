@@ -1,0 +1,12 @@
+{
+  "name": "Anahita",
+  "symbol": "P2099",
+  "description": "Anahita — The Cyber Goddess. Guardian #004 of the Persia 2099 Genesis Guardians.",
+  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeifoad3tv6fw3qjsxxomeewv62p2wudqaomjzw5qj4t6hkqc37zsci",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Anahita"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "004"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
