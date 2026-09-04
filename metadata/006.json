@@ -1,0 +1,12 @@
+{
+  "name": "Darius Zero",
+  "symbol": "P2099",
+  "description": "Darius Zero — The Eternal Sovereign. Guardian #006 of the Persia 2099 Genesis Guardians.",
+  "image": "https://persia2099-ai.github.io/persia2099/darius-zero.png",
+  "attributes": [
+    {"trait_type": "Guardian", "value": "Darius Zero"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "006"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
+  ]
+}
