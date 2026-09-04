@@ -1,0 +1,24 @@
+{
+  "name": "Mithra",
+  "symbol": "P2099",
+  "description": "Mithra — The Guardian of Light. Guardian #003 of the Persia 2099 Genesis Guardians.",
+  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeifcmpfidqz33k4is3pu2lnvfzeluissudemuatzgyqbiqh7l43nmq",
+  "attributes": [
+    {
+      "trait_type": "Guardian",
+      "value": "Mithra"
+    },
+    {
+      "trait_type": "Generation",
+      "value": "Genesis"
+    },
+    {
+      "trait_type": "Guardian Number",
+      "value": "003"
+    },
+    {
+      "trait_type": "Universe",
+      "value": "Persia 2099"
+    }
+  ]
+}
