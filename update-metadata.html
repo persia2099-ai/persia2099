@@ -14,7 +14,10 @@ body{
   max-width:700px;
   margin:auto
 }
-h1{text-align:center;color:#d4af37}
+h1{
+  text-align:center;
+  color:#d4af37
+}
 h2{text-align:center}
 button{
   width:100%;
@@ -24,18 +27,30 @@ button{
   border-radius:9px;
   font-size:17px;
   font-weight:bold;
-  cursor:pointer
 }
-#connect{background:#d4af37;color:#000}
-#update{background:#2563eb;color:#fff}
-button:disabled{opacity:.45}
-#wallet{text-align:center;color:#aaa;margin:15px 0}
+#connect{
+  background:#d4af37;
+  color:#000;
+}
+#update{
+  background:#2563eb;
+  color:#fff;
+}
+button:disabled{
+  opacity:.45;
+}
+#wallet{
+  text-align:center;
+  color:#aaa;
+  margin:15px 0;
+  word-break:break-all;
+}
 .asset{
   border:1px solid #333;
   border-radius:8px;
   padding:12px;
   margin:10px 0;
-  word-break:break-word
+  word-break:break-word;
 }
 .ok{color:#4ade80}
 .error{color:#f87171}
@@ -49,7 +64,9 @@ button:disabled{opacity:.45}
 
 <div id="wallet">Wallet not connected</div>
 
-<button id="connect">CONNECT PHANTOM</button>
+<button id="connect">
+CONNECT PHANTOM
+</button>
 
 <button id="update" disabled>
 UPDATE ALL 6 ASSETS
@@ -60,25 +77,17 @@ UPDATE ALL 6 ASSETS
 <script type="module">
 
 import {
-  createUmi
+  createUmi,
+  publicKey,
+  signerIdentity,
+  createSignerFromKeypair,
+  transactionBuilder
 } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
-
-import {
-  createDefaultSolanaClient
-} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
-
-import {
-  walletAdapterIdentity
-} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
 
 import {
   mplCore,
   update
 } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
-
-import {
-  PhantomWalletAdapter
-} from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
 
 
 const ASSETS = [
@@ -122,74 +131,96 @@ address:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F"
 ];
 
 
-let wallet = null;
-let umi = null;
+let provider=null;
+let umi=null;
+let connected=false;
 
 
-const connectButton =
+const connectButton=
 document.getElementById("connect");
 
-const updateButton =
+const updateButton=
 document.getElementById("update");
 
-const walletText =
+const walletText=
 document.getElementById("wallet");
 
-const status =
+const status=
 document.getElementById("status");
+
+
+function getPhantom(){
+
+if(
+window.phantom &&
+window.phantom.solana
+){
+
+return window.phantom.solana;
+
+}
+
+if(window.solana){
+
+return window.solana;
+
+}
+
+return null;
+
+}
 
 
 function log(text,type=""){
 
-const div =
+const div=
 document.createElement("div");
 
-div.className =
-"asset " + type;
+div.className=
+"asset "+type;
 
-div.innerHTML = text;
+div.innerHTML=text;
 
 status.appendChild(div);
 
 }
 
 
-connectButton.onclick = async()=>{
+connectButton.onclick=async()=>{
 
 try{
 
-status.innerHTML="";
+provider=getPhantom();
 
-wallet =
-new PhantomWalletAdapter();
+if(!provider){
 
-await wallet.connect();
-
-
-const client =
-createDefaultSolanaClient({
-url:"https://api.devnet.solana.com"
-});
-
-
-umi =
-createUmi(client.rpc);
-
-umi.use(mplCore());
-
-umi.use(
-walletAdapterIdentity(wallet)
+log(
+"❌ Phantom provider not found.",
+"error"
 );
 
+return;
 
-walletText.innerText =
-"Connected: " +
-wallet.publicKey.toString();
+}
 
 
-connectButton.innerText =
+const response=
+await provider.connect();
+
+
+const address=
+response.publicKey.toString();
+
+
+walletText.innerText=
+"Connected: "+address;
+
+
+connectButton.innerText=
 "PHANTOM CONNECTED";
 
+
+connected=true;
 
 updateButton.disabled=false;
 
@@ -205,8 +236,8 @@ log(
 console.error(error);
 
 log(
-"CONNECTION ERROR ✕<br>"+
-(error.message || error),
+"Connection failed ✕<br>"+
+(error.message||error),
 "error"
 );
 
@@ -215,9 +246,126 @@ log(
 };
 
 
-updateButton.onclick = async()=>{
+async function updateAsset(asset){
 
-if(!umi){
+const metadataUri=
+`https://persia2099-ai.github.io/persia2099/metadata/${asset.number}.json`;
+
+
+const assetKey=
+publicKey(asset.address);
+
+
+/*
+Create Umi using Devnet.
+*/
+
+const umiClient=
+createUmi(
+"https://api.devnet.solana.com"
+);
+
+umiClient.use(mplCore());
+
+
+/*
+Create a signer that delegates
+signing to Phantom.
+*/
+
+const phantomSigner={
+
+publicKey:publicKey(
+provider.publicKey.toString()
+),
+
+signMessage:async(message)=>{
+
+return await provider.signMessage(
+message
+);
+
+},
+
+signTransaction:async(transaction)=>{
+
+return await provider.signTransaction(
+transaction
+);
+
+},
+
+signAllTransactions:async(transactions)=>{
+
+return await provider.signAllTransactions(
+transactions
+);
+
+}
+
+};
+
+
+umiClient.use(
+signerIdentity(
+phantomSigner
+)
+);
+
+
+/*
+Create Core update instruction.
+*/
+
+const instruction=
+update(umiClient,{
+
+asset:assetKey,
+
+name:asset.name,
+
+uri:metadataUri
+
+});
+
+
+/*
+Build transaction.
+*/
+
+const tx=
+await instruction
+.buildWithLatestBlockhash(
+umiClient
+);
+
+
+/*
+Ask Phantom to sign.
+*/
+
+const signed=
+await provider.signTransaction(tx);
+
+
+/*
+Send signed transaction to Devnet.
+*/
+
+const signature=
+await umiClient.rpc.sendTransaction(
+signed
+);
+
+
+return signature;
+
+}
+
+
+updateButton.onclick=async()=>{
+
+if(!connected){
 
 alert("Connect Phantom first.");
 
@@ -236,28 +384,17 @@ for(const asset of ASSETS){
 try{
 
 log(
-`Updating #${asset.number} — ${asset.name}...`
+`⏳ Updating #${asset.number} — ${asset.name}...`
 );
 
 
-const metadataUri =
-`https://persia2099-ai.github.io/persia2099/metadata/${asset.number}.json`;
-
-
-const result =
-await update(umi,{
-
-asset:asset.address,
-
-name:asset.name,
-
-uri:metadataUri
-
-}).sendAndConfirm(umi);
+const signature=
+await updateAsset(asset);
 
 
 log(
-`#${asset.number} — ${asset.name} UPDATED ✓`,
+`#${asset.number} — ${asset.name} UPDATED ✓<br>
+Signature:<br>${signature}`,
 "ok"
 );
 
@@ -268,7 +405,7 @@ console.error(error);
 
 log(
 `#${asset.number} — ${asset.name} FAILED ✕<br>
-${error.message || error}`,
+${error.message||error}`,
 "error"
 );
 
