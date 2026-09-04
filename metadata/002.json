@@ -1,0 +1,24 @@
+{
+  "name": "Cyrus Prime",
+  "symbol": "P2099",
+  "description": "Cyrus Prime — The Digital King. Guardian #002 of the Persia 2099 Genesis Guardians.",
+  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeia5r6ap3iouarmxmcr3rjp5yjhunow37mbamblyfkar5slfilhpsm",
+  "attributes": [
+    {
+      "trait_type": "Guardian",
+      "value": "Cyrus Prime"
+    },
+    {
+      "trait_type": "Generation",
+      "value": "Genesis"
+    },
+    {
+      "trait_type": "Guardian Number",
+      "value": "002"
+    },
+    {
+      "trait_type": "Universe",
+      "value": "Persia 2099"
+    }
+  ]
+}
