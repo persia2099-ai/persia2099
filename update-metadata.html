@@ -14,7 +14,10 @@ body{
   max-width:700px;
   margin:auto
 }
-h1{text-align:center;color:#d4af37}
+h1{
+  text-align:center;
+  color:#d4af37
+}
 button{
   width:100%;
   padding:16px;
@@ -22,57 +25,73 @@ button{
   border:0;
   border-radius:8px;
   font-size:16px;
-  font-weight:bold
+  font-weight:bold;
+  cursor:pointer
 }
-#connect{background:#d4af37;color:#000}
-#update{background:#2563eb;color:#fff}
-button:disabled{opacity:.5}
-#status{margin-top:15px}
+#connect{
+  background:#d4af37;
+  color:#000
+}
+#update{
+  background:#2563eb;
+  color:#fff
+}
+button:disabled{
+  opacity:.5
+}
+#wallet{
+  text-align:center;
+  color:#aaa;
+  margin:15px 0
+}
 .asset{
   border:1px solid #333;
   border-radius:8px;
   padding:12px;
   margin:10px 0
 }
-.ok{color:#4ade80}
-.error{color:#f87171}
-#wallet{text-align:center;color:#aaa}
+.ok{
+  color:#4ade80
+}
+.error{
+  color:#f87171
+}
 </style>
 </head>
 
 <body>
 
 <h1>PERSIA 2099</h1>
-<h2 style="text-align:center">METADATA UPDATE</h2>
 
-<div id="wallet">Wallet not connected</div>
+<h2 style="text-align:center">
+METADATA UPDATE
+</h2>
 
-<button id="connect">CONNECT PHANTOM</button>
-<button id="update" disabled>UPDATE ALL 6 ASSETS</button>
+<div id="wallet">
+Wallet not connected
+</div>
+
+<button id="connect">
+CONNECT PHANTOM
+</button>
+
+<button id="update" disabled>
+UPDATE ALL 6 ASSETS
+</button>
 
 <div id="status"></div>
 
 <script type="module">
 
 import {
-  BrowserSDK,
-  AddressType
-} from "https://esm.sh/@phantom/browser-sdk@2.0.2";
-
-import {
   createUmi,
-  publicKey,
-  base58
+  publicKey
 } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
   mplCore,
   update
 } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
-
-import {
-  walletAdapterIdentity
-} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
 
 import {
   createDefaultSolanaClient
@@ -120,6 +139,10 @@ address:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F"
 ];
 
 
+let provider = null;
+let umi = null;
+
+
 const connectButton =
 document.getElementById("connect");
 
@@ -133,91 +156,77 @@ const status =
 document.getElementById("status");
 
 
-let sdk = null;
-let wallet = null;
-let umi = null;
+function getProvider(){
+
+if(window.phantom &&
+window.phantom.solana){
+
+return window.phantom.solana;
+
+}
+
+if(window.solana){
+
+return window.solana;
+
+}
+
+return null;
+
+}
 
 
 function log(text,type=""){
 
-const div=document.createElement("div");
+const div =
+document.createElement("div");
 
-div.className="asset "+type;
+div.className =
+"asset " + type;
 
-div.innerHTML=text;
+div.innerHTML = text;
 
 status.appendChild(div);
 
 }
 
 
-async function connectPhantom(){
+connectButton.onclick = async()=>{
 
 try{
 
-sdk = new BrowserSDK({
+provider = getProvider();
 
-providers:["deeplink","injected"],
-
-addressTypes:[AddressType.solana]
-
-});
-
-
-const result = await sdk.connect({
-
-provider:"deeplink"
-
-});
-
-
-wallet = result;
-
-const address =
-result.addresses[0].address;
-
-walletText.innerText =
-"Connected: "+address;
-
-connectButton.innerText =
-"PHANTOM CONNECTED";
-
-updateButton.disabled=false;
-
-}catch(error){
-
-console.error(error);
+if(!provider){
 
 alert(
-"Phantom connection failed: "+
-(error.message || error)
+"Phantom provider not found.\n\n"+
+"Open this page inside Phantom → Explore."
 );
-
-}
-
-}
-
-
-connectButton.onclick =
-connectPhantom;
-
-
-updateButton.onclick = async()=>{
-
-if(!sdk){
-
-alert("Connect Phantom first.");
 
 return;
 
 }
 
-updateButton.disabled=true;
 
-status.innerHTML="";
+const response =
+await provider.connect();
 
 
-try{
+const address =
+response.publicKey.toString();
+
+
+walletText.innerText =
+"Connected: " + address;
+
+
+connectButton.innerText =
+"PHANTOM CONNECTED";
+
+
+updateButton.disabled = false;
+
 
 const client =
 createDefaultSolanaClient({
@@ -227,9 +236,47 @@ url:"https://api.devnet.solana.com"
 });
 
 
-umi=createUmi(client.rpc);
+umi =
+createUmi(client.rpc);
+
 
 umi.use(mplCore());
+
+
+log(
+"Phantom connected successfully ✓",
+"ok"
+);
+
+
+}catch(error){
+
+console.error(error);
+
+alert(
+"Connection failed:\n"+
+(error.message || error)
+);
+
+}
+
+};
+
+
+updateButton.onclick = async()=>{
+
+if(!provider || !umi){
+
+alert("Connect Phantom first.");
+
+return;
+
+}
+
+
+updateButton.disabled = true;
+
+status.innerHTML = "";
 
 
 for(const asset of ASSETS){
@@ -241,20 +288,19 @@ log(
 );
 
 
+const assetAddress =
+publicKey(asset.address);
+
+
 const metadataUri =
 `https://persia2099-ai.github.io/persia2099/metadata/${asset.number}.json`;
 
 
 /*
-Build the Core update transaction
-using the connected wallet.
+Create Core update instruction
 */
 
-const assetAddress =
-publicKey(asset.address);
-
-
-const builder =
+const instruction =
 update(umi,{
 
 asset:assetAddress,
@@ -266,39 +312,34 @@ uri:metadataUri
 });
 
 
-const transaction =
-await builder.buildWithLatestBlockhash(
+/*
+Build transaction
+*/
+
+const tx =
+await instruction
+.buildWithLatestBlockhash(
 umi
 );
 
 
 /*
-Convert Umi transaction to a
-wallet-signable Solana transaction.
+Sign and send through Phantom
 */
 
-const serialized =
-umi.transactions.serialize(transaction);
-
-const base64Tx =
-btoa(
-String.fromCharCode(...serialized)
-);
+const signed =
+await provider.signTransaction(tx);
 
 
-/*
-Request Phantom to sign/send.
-*/
-
-const response =
-await sdk.solana.signAndSendTransaction(
-base64Tx
+const signature =
+await umi.rpc.sendTransaction(
+signed
 );
 
 
 log(
 `#${asset.number} UPDATED ✓<br>
-<small>${response.signature || ""}</small>`,
+<small>${signature}</small>`,
 "ok"
 );
 
@@ -319,24 +360,11 @@ ${error.message || error}`,
 
 
 log(
-"<strong>PROCESS COMPLETE</strong>"
+"<strong>ALL 6 ASSETS PROCESSED</strong>"
 );
 
 
-}catch(error){
-
-console.error(error);
-
-log(
-"PROCESS FAILED ✕<br>"+
-(error.message || error),
-"error"
-);
-
-}
-
-
-updateButton.disabled=false;
+updateButton.disabled = false;
 
 };
 
