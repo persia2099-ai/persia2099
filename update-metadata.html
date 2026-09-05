@@ -4,318 +4,297 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Persia 2099 — Metadata Update</title>
-
 <style>
 body{
-  background:#05070b;
-  color:#fff;
   font-family:Arial,sans-serif;
+  background:#0b0b0f;
+  color:#fff;
   padding:20px;
-  max-width:700px;
-  margin:auto
 }
-h1{text-align:center;color:#d4af37}
-h2{text-align:center}
 button{
   width:100%;
-  padding:18px;
-  margin:10px 0;
+  padding:16px;
+  margin:8px 0;
   border:0;
-  border-radius:9px;
-  font-size:17px;
+  border-radius:10px;
   font-weight:bold;
-  cursor:pointer
+  font-size:16px;
 }
-#connect{background:#d4af37;color:#000}
-#update{background:#2563eb;color:#fff}
-button:disabled{opacity:.45}
-#wallet{text-align:center;color:#aaa;margin:15px 0;word-break:break-all}
-.asset{
-  border:1px solid #333;
-  border-radius:8px;
-  padding:12px;
-  margin:10px 0;
-  word-break:break-word
+#connect{background:#fff;color:#000}
+#update{background:#222;color:#fff}
+#status{
+  margin-top:20px;
+  white-space:pre-wrap;
+  background:#15151d;
+  padding:15px;
+  border-radius:10px;
+  line-height:1.5;
 }
-.ok{color:#4ade80}
-.error{color:#f87171}
 </style>
 </head>
 
 <body>
 
-<h1>PERSIA 2099</h1>
-<h2>METADATA UPDATE</h2>
-
-<div id="wallet">Wallet not connected</div>
+<h2>PERSIA 2099</h2>
+<p>GENESIS GUARDIANS — METADATA UPDATE</p>
 
 <button id="connect">CONNECT PHANTOM</button>
+<button id="update" disabled>UPDATE ALL 6 ASSETS</button>
 
-<button id="update" disabled>
-UPDATE ALL 6 ASSETS
-</button>
-
-<div id="status"></div>
+<div id="status">Waiting...</div>
 
 <script type="module">
 
-import {
-  createUmi
-} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+import { createUmi } from
+"https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
 
 import {
   publicKey
-} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+} from
+"https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
   mplCore,
-  update,
-  fetchAsset
-} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
-
-import {
-  walletAdapterIdentity
-} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
+  fetchAsset,
+  fetchCollection,
+  collectionAddress,
+  update
+} from
+"https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
 
 import {
   PhantomWalletAdapter
-} from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+} from
+"https://esm.sh/@solana/wallet-adapter-phantom@0.9.28?deps=@solana/web3.js@1.98.4";
 
+import {
+  walletAdapterIdentity
+} from
+"https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
+
+const COLLECTION =
+"6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
 
 const ASSETS = [
 
 {
-number:"001",
 name:"Arash 2099",
-address:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU"
+asset:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/001.json"
 },
 
 {
-number:"002",
 name:"Cyrus Prime",
-address:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K"
+asset:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/002.json"
 },
 
 {
-number:"003",
 name:"Mithra",
-address:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ"
+asset:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/003.json"
 },
 
 {
-number:"004",
 name:"Anahita",
-address:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk"
+asset:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/004.json"
 },
 
 {
-number:"005",
 name:"Rostam X",
-address:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS"
+asset:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/005.json"
 },
 
 {
-number:"006",
 name:"Darius Zero",
-address:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F"
+asset:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/006.json"
 }
 
 ];
 
+const wallet = new PhantomWalletAdapter();
 
-let wallet = null;
-let umi = null;
-
-
-const connectButton =
-document.getElementById("connect");
-
-const updateButton =
-document.getElementById("update");
-
-const walletText =
-document.getElementById("wallet");
+let umi;
 
 const status =
 document.getElementById("status");
 
+const connectBtn =
+document.getElementById("connect");
 
-function log(text,type=""){
+const updateBtn =
+document.getElementById("update");
 
-const div =
-document.createElement("div");
+connectBtn.onclick = async () => {
 
-div.className =
-"asset " + type;
+try {
 
-div.innerHTML = text;
-
-status.appendChild(div);
-
-}
-
-
-connectButton.onclick = async()=>{
-
-try{
-
-status.innerHTML = "";
-
-wallet =
-new PhantomWalletAdapter();
+status.textContent =
+"Connecting Phantom...";
 
 await wallet.connect();
 
-
-/*
-IMPORTANT:
-Umi is created from
-umi-bundle-defaults so the
-program repository exists.
-*/
-
-umi =
-createUmi(
+umi = createUmi(
 "https://api.devnet.solana.com"
-)
-.use(mplCore())
-.use(
+).use(mplCore());
+
+umi.use(
 walletAdapterIdentity(wallet)
 );
 
-
-walletText.innerText =
-"Connected: " +
+status.textContent =
+"Phantom connected.\n\nWallet:\n" +
 wallet.publicKey.toString();
 
+updateBtn.disabled = false;
 
-connectButton.innerText =
-"PHANTOM CONNECTED";
+} catch(error) {
 
-
-updateButton.disabled = false;
-
-
-log(
-"Phantom connected ✓",
-"ok"
-);
-
-
-}catch(error){
-
-console.error(error);
-
-log(
-"CONNECTION FAILED ✕<br>" +
-(error.message || error),
-"error"
-);
+status.textContent =
+"CONNECT ERROR:\n\n" +
+(error?.message || error);
 
 }
 
 };
 
 
-updateButton.onclick = async()=>{
+updateBtn.onclick = async () => {
 
-if(!umi || !wallet){
+if(!umi){
 
-alert("Connect Phantom first.");
+status.textContent =
+"Connect Phantom first.";
 
 return;
 
 }
 
+try {
 
-updateButton.disabled = true;
+updateBtn.disabled = true;
 
-status.innerHTML = "";
+status.textContent =
+"Checking Collection authority...";
 
+const collection =
+await fetchCollection(
+umi,
+publicKey(COLLECTION)
+);
+
+const collectionAuthority =
+collection.updateAuthority;
+
+status.textContent +=
+"\n\nCollection Update Authority:\n" +
+JSON.stringify(
+collectionAuthority,
+null,
+2
+);
+
+if(
+collectionAuthority?.address &&
+collectionAuthority.address !==
+umi.identity.publicKey.toString()
+){
+
+throw new Error(
+"Collection authority does not match connected wallet.\n\n" +
+"Required:\n" +
+collectionAuthority.address +
+"\n\nConnected:\n" +
+umi.identity.publicKey.toString()
+);
+
+}
+
+status.textContent +=
+"\n\nAuthority verified ✓\n";
 
 for(const item of ASSETS){
 
-try{
-
-log(
-`⏳ Checking #${item.number} — ${item.name}...`
-);
-
-
-const assetAddress =
-publicKey(item.address);
-
-
-/*
-Fetch the actual Core Asset.
-*/
+status.textContent +=
+"\n\n====================\n" +
+item.name +
+"\n====================\n" +
+"Preparing update...";
 
 const asset =
 await fetchAsset(
 umi,
-assetAddress
+publicKey(item.asset)
 );
 
+const currentCollection =
+collectionAddress(asset);
 
-log(
-`Asset found ✓<br>
-Update Authority:<br>
-${asset.updateAuthority}`
+if(!currentCollection){
+
+throw new Error(
+item.name +
+" is not inside a Collection."
 );
 
+}
 
-/*
-New metadata URI.
-*/
+if(
+currentCollection.toString() !==
+COLLECTION
+){
 
-const metadataUri =
-`https://persia2099-ai.github.io/persia2099/metadata/${item.number}.json`;
+throw new Error(
+item.name +
+" belongs to another Collection."
+);
 
+}
 
-/*
-Create and send the official
-MPL Core update transaction.
-*/
+status.textContent +=
+"\nAsset verified ✓" +
+"\nCollection verified ✓" +
+"\nRequesting Phantom signature...";
 
+const result =
 await update(umi,{
 
-asset:assetAddress,
+asset:asset,
+
+collection:collection,
 
 name:item.name,
 
-uri:metadataUri
+uri:item.uri
 
 }).sendAndConfirm(umi);
 
+status.textContent +=
+"\n\nUPDATED ✓" +
+"\nSignature:\n" +
+result.signature;
 
-log(
-`#${item.number} — ${item.name} UPDATED ✓`,
-"ok"
-);
+}
 
+status.textContent +=
+"\n\n====================" +
+"\nALL 6 UPDATED SUCCESSFULLY ✓" +
+"\n====================";
 
-}catch(error){
+} catch(error){
 
 console.error(error);
 
-log(
-`#${item.number} — ${item.name} FAILED ✕<br><br>
-${error.message || error}`,
-"error"
-);
+status.textContent +=
+"\n\n❌ FAILED\n\n" +
+(error?.message || error);
+
+updateBtn.disabled = false;
 
 }
-
-}
-
-
-log(
-"<strong>PROCESS COMPLETE</strong>",
-"ok"
-);
-
-
-updateButton.disabled = false;
 
 };
 
