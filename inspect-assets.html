@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Persia 2099 — Asset Inspector</title>
+<style>
+body{font-family:Arial;background:#0b0b0f;color:#fff;padding:20px}
+button{padding:14px 20px;background:#fff;color:#000;border:0;border-radius:8px;font-weight:bold}
+pre{white-space:pre-wrap;background:#15151d;padding:15px;border-radius:8px;margin-top:20px}
+</style>
+</head>
+<body>
+
+<h2>PERSIA 2099</h2>
+<p>READ-ONLY ASSET INSPECTOR</p>
+<button id="inspect">CHECK 6 ASSETS</button>
+<pre id="output">Ready...</pre>
+
+<script type="module">
+
+import { createUmi } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+import { publicKey } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+import {
+  mplCore,
+  fetchAsset,
+  collectionAddress
+} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
+
+const ASSETS = [
+  ["001 Arash 2099","D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU"],
+  ["002 Cyrus Prime","47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K"],
+  ["003 Mithra","3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ"],
+  ["004 Anahita","BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk"],
+  ["005 Rostam X","9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS"],
+  ["006 Darius Zero","sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F"]
+];
+
+const umi = createUmi("https://api.devnet.solana.com").use(mplCore());
+
+const output = document.getElementById("output");
+
+document.getElementById("inspect").onclick = async () => {
+
+  output.textContent = "Checking assets...\n\n";
+
+  for (const [name, address] of ASSETS) {
+
+    try {
+
+      const asset = await fetchAsset(
+        umi,
+        publicKey(address)
+      );
+
+      let authority = asset.updateAuthority;
+
+      output.textContent +=
+`==============================
+${name}
+==============================
+
+Asset:
+${address}
+
+Name:
+${asset.name}
+
+URI:
+${asset.uri}
+
+Update Authority Type:
+${authority?.type ?? "UNKNOWN"}
+
+Update Authority Address:
+${authority?.address ?? "UNKNOWN"}
+
+Collection:
+${collectionAddress(asset) ?? "NONE"}
+
+Owner:
+${asset.owner ?? "UNKNOWN"}
+
+------------------------------
+
+`;
+
+    } catch (error) {
+
+      output.textContent +=
+`==============================
+${name}
+==============================
+
+ERROR:
+${error?.message ?? error}
+
+------------------------------
+
+`;
+    }
+  }
+};
+
+</script>
+
+</body>
+</html>
