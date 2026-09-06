@@ -1,24 +1,12 @@
 {
   "name": "Arash 2099",
   "symbol": "P2099",
-  "description": "The first warrior awakened by AURA. His energy blade symbolizes justice and determination.",
-  "image": "001-arash-2099.png",
+  "description": "Arash 2099 — The Cyber Warrior. Guardian #001 of the Persia 2099 Genesis Guardians.",
+  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeih7x3h5dalag3mlviqrjqu6c7e7rl22eqpabb5auejxwmsopboz24",
   "attributes": [
-    {
-      "trait_type": "Guardian",
-      "value": "Courage"
-    },
-    {
-      "trait_type": "Generation",
-      "value": "Genesis"
-    },
-    {
-      "trait_type": "Guardian Number",
-      "value": "001"
-    },
-    {
-      "trait_type": "Universe",
-      "value": "Persia 2099"
-    }
+    {"trait_type": "Guardian", "value": "Arash 2099"},
+    {"trait_type": "Generation", "value": "Genesis"},
+    {"trait_type": "Guardian Number", "value": "001"},
+    {"trait_type": "Universe", "value": "Persia 2099"}
   ]
 }
