@@ -1,10 +1,10 @@
 {
   "name": "Darius Zero",
   "symbol": "P2099",
-  "description": "Commander of the Guardian armies. Every battle is won through precision, intelligence, and discipline.",
-  "image": "006-darius-zero.png",
+  "description": "Darius Zero — The Eternal Sovereign. Guardian #006 of the Persia 2099 Genesis Guardians.",
+  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeie7csduv7ugqxnwwlg7pekvki7vzgbopxvrxowvauhjge7yfywneu",
   "attributes": [
-    {"trait_type": "Guardian", "value": "Strategy"},
+    {"trait_type": "Guardian", "value": "Darius Zero"},
     {"trait_type": "Generation", "value": "Genesis"},
     {"trait_type": "Guardian Number", "value": "006"},
     {"trait_type": "Universe", "value": "Persia 2099"}
