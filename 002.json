@@ -1,12 +1,12 @@
 {
-  "name": "Arash 2099",
+  "name": "Cyrus Prime",
   "symbol": "P2099",
-  "description": "Arash 2099 — The Cyber Warrior. Guardian #001 of the Persia 2099 Genesis Guardians.",
-  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeih7x3h5dalag3mlviqrjqu6c7e7rl22eqpabb5auejxwmsopboz24",
+  "description": "Cyrus Prime — The Digital King. Guardian #002 of the Persia 2099 Genesis Guardians.",
+  "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeia5r6ap3iouarmxmcr3rjp5yjhunow37mbamblyfkar5slfilhpsm",
   "attributes": [
-    {"trait_type": "Guardian", "value": "Arash 2099"},
+    {"trait_type": "Guardian", "value": "Cyrus Prime"},
     {"trait_type": "Generation", "value": "Genesis"},
-    {"trait_type": "Guardian Number", "value": "001"},
+    {"trait_type": "Guardian Number", "value": "002"},
     {"trait_type": "Universe", "value": "Persia 2099"}
   ]
 }
