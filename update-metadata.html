@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Persia 2099 — Metadata Update</title>
+
 <style>
 body{
   font-family:Arial,sans-serif;
@@ -11,6 +12,7 @@ body{
   color:#fff;
   padding:20px;
 }
+
 button{
   width:100%;
   padding:16px;
@@ -20,8 +22,17 @@ button{
   font-weight:bold;
   font-size:16px;
 }
-#connect{background:#fff;color:#000}
-#update{background:#222;color:#fff}
+
+#connect{
+  background:#fff;
+  color:#000;
+}
+
+#update{
+  background:#222;
+  color:#fff;
+}
+
 #status{
   margin-top:20px;
   white-space:pre-wrap;
@@ -40,20 +51,25 @@ button{
 <p>GENESIS GUARDIANS — METADATA UPDATE</p>
 
 <button id="connect">CONNECT PHANTOM</button>
-<button id="update" disabled>UPDATE ALL 6 ASSETS</button>
 
-<div id="status">Waiting...</div>
+<button id="update" disabled>
+UPDATE ALL 6 ASSETS
+</button>
+
+<div id="status">
+Waiting...
+</div>
+
 
 <script type="module">
 
-import { createUmi } from
-"https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+import {
+  createUmi
+} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
 
 import {
-  publicKey,
-  transactionBuilder
-} from
-"https://esm.sh/@metaplex-foundation/umi@1.4.1";
+  publicKey
+} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
   mplCore,
@@ -61,18 +77,15 @@ import {
   fetchCollection,
   collectionAddress,
   update
-} from
-"https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
+} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0?deps=@metaplex-foundation/umi@1.4.1";
 
 import {
   PhantomWalletAdapter
-} from
-"https://esm.sh/@solana/wallet-adapter-phantom@0.9.28?deps=@solana/web3.js@1.98.4";
+} from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28?deps=@solana/web3.js@1.98.4";
 
 import {
   walletAdapterIdentity
-} from
-"https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
+} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
 
 
 const COLLECTION =
@@ -82,45 +95,45 @@ const COLLECTION =
 const ASSETS = [
 
 {
-  number:"001",
-  name:"Arash 2099",
-  asset:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU",
-  uri:"https://persia2099-ai.github.io/persia2099/metadata/001.json"
+number:"001",
+name:"Arash 2099",
+asset:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/001.json"
 },
 
 {
-  number:"002",
-  name:"Cyrus Prime",
-  asset:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K",
-  uri:"https://persia2099-ai.github.io/persia2099/metadata/002.json"
+number:"002",
+name:"Cyrus Prime",
+asset:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/002.json"
 },
 
 {
-  number:"003",
-  name:"Mithra",
-  asset:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ",
-  uri:"https://persia2099-ai.github.io/persia2099/metadata/003.json"
+number:"003",
+name:"Mithra",
+asset:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/003.json"
 },
 
 {
-  number:"004",
-  name:"Anahita",
-  asset:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk",
-  uri:"https://persia2099-ai.github.io/persia2099/metadata/004.json"
+number:"004",
+name:"Anahita",
+asset:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/004.json"
 },
 
 {
-  number:"005",
-  name:"Rostam X",
-  asset:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS",
-  uri:"https://persia2099-ai.github.io/persia2099/metadata/005.json"
+number:"005",
+name:"Rostam X",
+asset:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/005.json"
 },
 
 {
-  number:"006",
-  name:"Darius Zero",
-  asset:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F",
-  uri:"https://persia2099-ai.github.io/persia2099/metadata/006.json"
+number:"006",
+name:"Darius Zero",
+asset:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F",
+uri:"https://persia2099-ai.github.io/persia2099/metadata/006.json"
 }
 
 ];
@@ -143,271 +156,331 @@ document.getElementById("update");
 
 function log(text){
 
-  status.textContent +=
-  text + "\n";
+status.textContent +=
+text + "\n";
 
 }
 
 
+/* CONNECT */
+
 connectBtn.onclick = async () => {
 
-  try{
+try{
 
-    status.textContent =
-    "Connecting Phantom...\n";
+status.textContent =
+"Connecting Phantom...\n";
 
-    await wallet.connect();
+await wallet.connect();
 
-    umi =
-    createUmi(
-      "https://api.devnet.solana.com"
-    )
-    .use(mplCore())
-    .use(walletAdapterIdentity(wallet));
+umi =
+createUmi(
+"https://api.devnet.solana.com"
+)
+.use(mplCore())
+.use(walletAdapterIdentity(wallet));
 
-    log(
-      "Phantom connected ✓"
-    );
 
-    log(
-      "\nWallet:\n" +
-      wallet.publicKey.toString()
-    );
+log(
+"Phantom connected ✓"
+);
 
-    updateBtn.disabled = false;
+log(
+"\nWallet:\n" +
+wallet.publicKey.toString()
+);
 
-  }catch(error){
+updateBtn.disabled = false;
 
-    status.textContent =
-    "CONNECT ERROR:\n\n" +
-    (error?.message || error);
+}
+catch(error){
 
-  }
+status.textContent =
+"CONNECT ERROR:\n\n" +
+(error?.message || error);
+
+}
 
 };
 
 
-async function updateOne(item){
+/* UPDATE ONE ASSET */
 
-  log(
-    "\n====================\n" +
-    item.number + " — " +
-    item.name +
-    "\n===================="
-  );
+async function updateAsset(item){
 
-  log("Fetching asset...");
+log(
+"\n============================\n" +
+item.number + " — " +
+item.name +
+"\n============================"
+);
 
-  const asset =
-  await fetchAsset(
-    umi,
-    publicKey(item.asset)
-  );
+log(
+"Fetching asset..."
+);
 
-  const currentCollection =
-  collectionAddress(asset);
+const asset =
+await fetchAsset(
+umi,
+publicKey(item.asset)
+);
 
-  if(
-    !currentCollection ||
-    currentCollection.toString() !== COLLECTION
-  ){
 
-    throw new Error(
-      "Collection mismatch for " +
-      item.name
-    );
+const currentCollection =
+collectionAddress(asset);
 
-  }
 
-  log("Asset verified ✓");
-  log("Collection verified ✓");
+if(
+!currentCollection ||
+currentCollection.toString() !== COLLECTION
+){
 
-  log(
-    "\nNew Metadata URI:\n" +
-    item.uri
-  );
-
-  log(
-    "\nBuilding fresh transaction..."
-  );
-
-  /*
-   * Build a completely new transaction
-   * for this asset only.
-   */
-  const builder =
-  update(umi,{
-    asset:asset,
-    uri:item.uri
-  });
-
-  /*
-   * Fetch a fresh blockhash immediately
-   * before sending this transaction.
-   */
-  const latestBlockhash =
-  await umi.rpc.getLatestBlockhash({
-    commitment:"confirmed"
-  });
-
-  log(
-    "\nFresh blockhash acquired ✓"
-  );
-
-  const tx =
-  builder
-  .setBlockhash(latestBlockhash.blockhash)
-  .setBlockHeight(
-    latestBlockhash.lastValidBlockHeight
-  );
-
-  log(
-    "\nRequesting Phantom signature..."
-  );
-
-  const signed =
-  await tx.buildAndSign(
-    umi
-  );
-
-  log(
-    "Transaction signed ✓"
-  );
-
-  log(
-    "\nSending transaction..."
-  );
-
-  const signature =
-  await umi.rpc.sendTransaction(
-    signed,
-    {
-      skipPreflight:false
-    }
-  );
-
-  log(
-    "\nTransaction sent ✓"
-  );
-
-  log(
-    "Waiting for confirmation..."
-  );
-
-  await umi.rpc.confirmTransaction(
-    signature,
-    {
-      strategy:"blockhash",
-      blockhash:
-        latestBlockhash.blockhash,
-      lastValidBlockHeight:
-        latestBlockhash.lastValidBlockHeight
-    }
-  );
-
-  log(
-    "\nUPDATED ✓"
-  );
-
-  log(
-    "Signature:\n" +
-    String(signature)
-  );
+throw new Error(
+"Collection mismatch for " +
+item.name
+);
 
 }
 
 
+log(
+"Asset verified ✓"
+);
+
+log(
+"Collection verified ✓"
+);
+
+log(
+"\nNew Metadata URI:\n" +
+item.uri
+);
+
+
+/*
+Fetch the CURRENT collection
+immediately before transaction.
+*/
+
+const collection =
+await fetchCollection(
+umi,
+publicKey(COLLECTION)
+);
+
+
+log(
+"\nCollection authority verified ✓"
+);
+
+
+/*
+IMPORTANT:
+For an Asset whose update authority
+is the Collection, the current
+Collection must be passed to update().
+*/
+
+log(
+"\nRequesting Phantom signature..."
+);
+
+
+const result =
+await update(
+umi,
+{
+asset:asset,
+collection:collection,
+uri:item.uri
+}
+).sendAndConfirm(umi);
+
+
+log(
+"\nUPDATED ✓"
+);
+
+
+/*
+Umi returns signature bytes.
+The transaction itself has already
+been confirmed at this point.
+*/
+
+log(
+"Transaction confirmed ✓"
+);
+
+}
+
+
+/* UPDATE ALL */
+
 updateBtn.onclick = async () => {
 
-  if(!umi){
+if(!umi){
 
-    status.textContent =
-    "Connect Phantom first.";
+status.textContent =
+"Connect Phantom first.";
 
-    return;
+return;
 
-  }
+}
 
-  updateBtn.disabled = true;
+updateBtn.disabled = true;
 
-  status.textContent =
-  "Starting metadata update...\n";
-
-  try{
-
-    /*
-     * Verify collection authority once.
-     */
-    const collection =
-    await fetchCollection(
-      umi,
-      publicKey(COLLECTION)
-    );
-
-    const authority =
-    collection.updateAuthority;
-
-    log(
-      "Collection Authority:\n" +
-      (authority?.address || authority)
-    );
-
-    if(
-      authority?.address &&
-      authority.address !==
-      umi.identity.publicKey.toString()
-    ){
-
-      throw new Error(
-        "Connected wallet is not the Collection authority."
-      );
-
-    }
-
-    log(
-      "\nAuthority verified ✓"
-    );
+status.textContent =
+"Starting metadata update...\n";
 
 
-    /*
-     * Each NFT gets its own fresh transaction.
-     */
-    for(
-      const item of ASSETS
-    ){
-
-      await updateOne(item);
-
-      /*
-       * Small pause after confirmation
-       * before preparing the next transaction.
-       */
-      await new Promise(
-        resolve =>
-        setTimeout(resolve,1500)
-      );
-
-    }
+try{
 
 
-    log(
-      "\n====================" +
-      "\nALL 6 UPDATED SUCCESSFULLY ✓" +
-      "\n===================="
-    );
+/*
+Check Collection authority.
+*/
 
-  }catch(error){
+const collection =
+await fetchCollection(
+umi,
+publicKey(COLLECTION)
+);
 
-    console.error(error);
+const authority =
+collection.updateAuthority;
 
-    log(
-      "\n❌ UPDATE FAILED\n\n" +
-      (error?.message || error)
-    );
 
-    updateBtn.disabled = false;
+log(
+"Collection Authority:\n" +
+(authority?.address || authority)
+);
 
-  }
+
+if(
+authority?.address &&
+authority.address !==
+umi.identity.publicKey.toString()
+){
+
+throw new Error(
+"Connected wallet is NOT the Collection authority."
+);
+
+}
+
+
+log(
+"\nAuthority verified ✓"
+);
+
+
+/*
+Process one NFT at a time.
+*/
+
+for(
+const item of ASSETS
+){
+
+let success = false;
+
+let attempts = 0;
+
+
+while(
+!success &&
+attempts < 3
+){
+
+attempts++;
+
+
+try{
+
+log(
+"\nAttempt " +
+attempts +
+"/3"
+);
+
+
+await updateAsset(item);
+
+success = true;
+
+
+/*
+Give RPC a moment before
+starting the next transaction.
+*/
+
+await new Promise(
+resolve =>
+setTimeout(resolve,2000)
+);
+
+}
+catch(error){
+
+const message =
+error?.message || String(error);
+
+
+if(
+message.toLowerCase().includes(
+"block height exceeded"
+) &&
+attempts < 3
+){
+
+log(
+"\nTransaction expired."
+);
+
+log(
+"Refreshing and retrying..."
+);
+
+await new Promise(
+resolve =>
+setTimeout(resolve,1500)
+);
+
+}
+else{
+
+throw error;
+
+}
+
+}
+
+}
+
+}
+
+
+log(
+"\n\n============================" +
+"\nALL 6 UPDATED SUCCESSFULLY ✓" +
+"\n============================"
+);
+
+
+}
+catch(error){
+
+console.error(error);
+
+log(
+"\n\n❌ UPDATE FAILED\n\n" +
+(error?.message || error)
+);
+
+updateBtn.disabled = false;
+
+}
 
 };
 
