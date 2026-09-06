@@ -49,7 +49,10 @@ button{
 import { createUmi } from
 "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
 
-import { publicKey } from
+import {
+  publicKey,
+  transactionBuilder
+} from
 "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
@@ -79,36 +82,42 @@ const COLLECTION =
 const ASSETS = [
 
 {
+  number:"001",
   name:"Arash 2099",
   asset:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU",
   uri:"https://persia2099-ai.github.io/persia2099/metadata/001.json"
 },
 
 {
+  number:"002",
   name:"Cyrus Prime",
   asset:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K",
   uri:"https://persia2099-ai.github.io/persia2099/metadata/002.json"
 },
 
 {
+  number:"003",
   name:"Mithra",
   asset:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ",
   uri:"https://persia2099-ai.github.io/persia2099/metadata/003.json"
 },
 
 {
+  number:"004",
   name:"Anahita",
   asset:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk",
   uri:"https://persia2099-ai.github.io/persia2099/metadata/004.json"
 },
 
 {
+  number:"005",
   name:"Rostam X",
   asset:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS",
   uri:"https://persia2099-ai.github.io/persia2099/metadata/005.json"
 },
 
 {
+  number:"006",
   name:"Darius Zero",
   asset:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F",
   uri:"https://persia2099-ai.github.io/persia2099/metadata/006.json"
@@ -117,7 +126,8 @@ const ASSETS = [
 ];
 
 
-const wallet = new PhantomWalletAdapter();
+const wallet =
+new PhantomWalletAdapter();
 
 let umi = null;
 
@@ -131,29 +141,42 @@ const updateBtn =
 document.getElementById("update");
 
 
+function log(text){
+
+  status.textContent +=
+  text + "\n";
+
+}
+
+
 connectBtn.onclick = async () => {
 
-  try {
+  try{
 
     status.textContent =
-    "Connecting Phantom...";
+    "Connecting Phantom...\n";
 
     await wallet.connect();
 
-    umi = createUmi(
+    umi =
+    createUmi(
       "https://api.devnet.solana.com"
     )
     .use(mplCore())
     .use(walletAdapterIdentity(wallet));
 
-    status.textContent =
-    "Phantom connected ✓\n\n" +
-    "Wallet:\n" +
-    wallet.publicKey.toString();
+    log(
+      "Phantom connected ✓"
+    );
+
+    log(
+      "\nWallet:\n" +
+      wallet.publicKey.toString()
+    );
 
     updateBtn.disabled = false;
 
-  } catch(error) {
+  }catch(error){
 
     status.textContent =
     "CONNECT ERROR:\n\n" +
@@ -164,15 +187,157 @@ connectBtn.onclick = async () => {
 };
 
 
+async function updateOne(item){
+
+  log(
+    "\n====================\n" +
+    item.number + " — " +
+    item.name +
+    "\n===================="
+  );
+
+  log("Fetching asset...");
+
+  const asset =
+  await fetchAsset(
+    umi,
+    publicKey(item.asset)
+  );
+
+  const currentCollection =
+  collectionAddress(asset);
+
+  if(
+    !currentCollection ||
+    currentCollection.toString() !== COLLECTION
+  ){
+
+    throw new Error(
+      "Collection mismatch for " +
+      item.name
+    );
+
+  }
+
+  log("Asset verified ✓");
+  log("Collection verified ✓");
+
+  log(
+    "\nNew Metadata URI:\n" +
+    item.uri
+  );
+
+  log(
+    "\nBuilding fresh transaction..."
+  );
+
+  /*
+   * Build a completely new transaction
+   * for this asset only.
+   */
+  const builder =
+  update(umi,{
+    asset:asset,
+    uri:item.uri
+  });
+
+  /*
+   * Fetch a fresh blockhash immediately
+   * before sending this transaction.
+   */
+  const latestBlockhash =
+  await umi.rpc.getLatestBlockhash({
+    commitment:"confirmed"
+  });
+
+  log(
+    "\nFresh blockhash acquired ✓"
+  );
+
+  const tx =
+  builder
+  .setBlockhash(latestBlockhash.blockhash)
+  .setBlockHeight(
+    latestBlockhash.lastValidBlockHeight
+  );
+
+  log(
+    "\nRequesting Phantom signature..."
+  );
+
+  const signed =
+  await tx.buildAndSign(
+    umi
+  );
+
+  log(
+    "Transaction signed ✓"
+  );
+
+  log(
+    "\nSending transaction..."
+  );
+
+  const signature =
+  await umi.rpc.sendTransaction(
+    signed,
+    {
+      skipPreflight:false
+    }
+  );
+
+  log(
+    "\nTransaction sent ✓"
+  );
+
+  log(
+    "Waiting for confirmation..."
+  );
+
+  await umi.rpc.confirmTransaction(
+    signature,
+    {
+      strategy:"blockhash",
+      blockhash:
+        latestBlockhash.blockhash,
+      lastValidBlockHeight:
+        latestBlockhash.lastValidBlockHeight
+    }
+  );
+
+  log(
+    "\nUPDATED ✓"
+  );
+
+  log(
+    "Signature:\n" +
+    String(signature)
+  );
+
+}
+
+
 updateBtn.onclick = async () => {
 
-  try {
-
-    updateBtn.disabled = true;
+  if(!umi){
 
     status.textContent =
-    "Checking Collection...\n";
+    "Connect Phantom first.";
 
+    return;
+
+  }
+
+  updateBtn.disabled = true;
+
+  status.textContent =
+  "Starting metadata update...\n";
+
+  try{
+
+    /*
+     * Verify collection authority once.
+     */
     const collection =
     await fetchCollection(
       umi,
@@ -182,80 +347,63 @@ updateBtn.onclick = async () => {
     const authority =
     collection.updateAuthority;
 
-    status.textContent +=
-    "\nCollection Authority:\n" +
-    (authority?.address || authority) +
-    "\n\nAuthority verified ✓\n";
+    log(
+      "Collection Authority:\n" +
+      (authority?.address || authority)
+    );
 
+    if(
+      authority?.address &&
+      authority.address !==
+      umi.identity.publicKey.toString()
+    ){
 
-    for(const item of ASSETS){
-
-      status.textContent +=
-      "\n====================\n" +
-      item.name +
-      "\n====================\n" +
-      "Checking asset...";
-
-      const asset =
-      await fetchAsset(
-        umi,
-        publicKey(item.asset)
+      throw new Error(
+        "Connected wallet is not the Collection authority."
       );
 
-      const currentCollection =
-      collectionAddress(asset);
+    }
 
-      if(
-        !currentCollection ||
-        currentCollection.toString() !== COLLECTION
-      ){
-
-        throw new Error(
-          item.name +
-          " is not a member of the expected Collection."
-        );
-
-      }
-
-      status.textContent +=
-      "\nAsset verified ✓" +
-      "\nCollection verified ✓" +
-      "\nNew Metadata URI:" +
-      "\n" + item.uri +
-      "\n\nRequesting Phantom signature...";
+    log(
+      "\nAuthority verified ✓"
+    );
 
 
-      const result =
-      await update(umi, {
+    /*
+     * Each NFT gets its own fresh transaction.
+     */
+    for(
+      const item of ASSETS
+    ){
 
-        asset: asset,
-        collection: collection,
-        uri: item.uri
+      await updateOne(item);
 
-      }).sendAndConfirm(umi);
-
-
-      status.textContent +=
-      "\nUPDATED ✓" +
-      "\nSignature:\n" +
-      String(result.signature);
+      /*
+       * Small pause after confirmation
+       * before preparing the next transaction.
+       */
+      await new Promise(
+        resolve =>
+        setTimeout(resolve,1500)
+      );
 
     }
 
 
-    status.textContent +=
-    "\n\n====================" +
-    "\nALL 6 UPDATED SUCCESSFULLY ✓" +
-    "\n====================";
+    log(
+      "\n====================" +
+      "\nALL 6 UPDATED SUCCESSFULLY ✓" +
+      "\n===================="
+    );
 
-
-  } catch(error) {
+  }catch(error){
 
     console.error(error);
 
-    status.textContent +=
-    "\n\n❌ UPDATE FAILED\n\n" +
-    (error?.message || error);
+    log(
+      "\n❌ UPDATE FAILED\n\n" +
+      (error?.message || error)
+    );
 
     updateBtn.disabled = false;
 
