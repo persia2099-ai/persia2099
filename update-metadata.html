@@ -29,6 +29,7 @@ button{
   padding:15px;
   border-radius:10px;
   line-height:1.5;
+  word-break:break-word;
 }
 </style>
 </head>
@@ -48,9 +49,7 @@ button{
 import { createUmi } from
 "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
 
-import {
-  publicKey
-} from
+import { publicKey } from
 "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 
 import {
@@ -72,52 +71,55 @@ import {
 } from
 "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1?deps=@metaplex-foundation/umi@1.4.1";
 
+
 const COLLECTION =
 "6XGhHkPAHJ5XayXwn1p7t3XEUmyYEx3racfwnpbEwp6a";
+
 
 const ASSETS = [
 
 {
-name:"Arash 2099",
-asset:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU",
-uri:"https://persia2099-ai.github.io/persia2099/metadata/001.json"
+  name:"Arash 2099",
+  asset:"D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU",
+  uri:"https://persia2099-ai.github.io/persia2099/metadata/001.json"
 },
 
 {
-name:"Cyrus Prime",
-asset:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K",
-uri:"https://persia2099-ai.github.io/persia2099/metadata/002.json"
+  name:"Cyrus Prime",
+  asset:"47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K",
+  uri:"https://persia2099-ai.github.io/persia2099/metadata/002.json"
 },
 
 {
-name:"Mithra",
-asset:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ",
-uri:"https://persia2099-ai.github.io/persia2099/metadata/003.json"
+  name:"Mithra",
+  asset:"3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ",
+  uri:"https://persia2099-ai.github.io/persia2099/metadata/003.json"
 },
 
 {
-name:"Anahita",
-asset:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk",
-uri:"https://persia2099-ai.github.io/persia2099/metadata/004.json"
+  name:"Anahita",
+  asset:"BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk",
+  uri:"https://persia2099-ai.github.io/persia2099/metadata/004.json"
 },
 
 {
-name:"Rostam X",
-asset:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS",
-uri:"https://persia2099-ai.github.io/persia2099/metadata/005.json"
+  name:"Rostam X",
+  asset:"9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS",
+  uri:"https://persia2099-ai.github.io/persia2099/metadata/005.json"
 },
 
 {
-name:"Darius Zero",
-asset:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F",
-uri:"https://persia2099-ai.github.io/persia2099/metadata/006.json"
+  name:"Darius Zero",
+  asset:"sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F",
+  uri:"https://persia2099-ai.github.io/persia2099/metadata/006.json"
 }
 
 ];
 
+
 const wallet = new PhantomWalletAdapter();
 
-let umi;
+let umi = null;
 
 const status =
 document.getElementById("status");
@@ -128,173 +130,136 @@ document.getElementById("connect");
 const updateBtn =
 document.getElementById("update");
 
+
 connectBtn.onclick = async () => {
 
-try {
+  try {
 
-status.textContent =
-"Connecting Phantom...";
+    status.textContent =
+    "Connecting Phantom...";
 
-await wallet.connect();
+    await wallet.connect();
 
-umi = createUmi(
-"https://api.devnet.solana.com"
-).use(mplCore());
+    umi = createUmi(
+      "https://api.devnet.solana.com"
+    )
+    .use(mplCore())
+    .use(walletAdapterIdentity(wallet));
 
-umi.use(
-walletAdapterIdentity(wallet)
-);
+    status.textContent =
+    "Phantom connected ✓\n\n" +
+    "Wallet:\n" +
+    wallet.publicKey.toString();
 
-status.textContent =
-"Phantom connected.\n\nWallet:\n" +
-wallet.publicKey.toString();
+    updateBtn.disabled = false;
 
-updateBtn.disabled = false;
+  } catch(error) {
 
-} catch(error) {
+    status.textContent =
+    "CONNECT ERROR:\n\n" +
+    (error?.message || error);
 
-status.textContent =
-"CONNECT ERROR:\n\n" +
-(error?.message || error);
-
-}
+  }
 
 };
 
 
 updateBtn.onclick = async () => {
 
-if(!umi){
+  try {
 
-status.textContent =
-"Connect Phantom first.";
+    updateBtn.disabled = true;
 
-return;
+    status.textContent =
+    "Checking Collection...\n";
 
-}
+    const collection =
+    await fetchCollection(
+      umi,
+      publicKey(COLLECTION)
+    );
 
-try {
+    const authority =
+    collection.updateAuthority;
 
-updateBtn.disabled = true;
+    status.textContent +=
+    "\nCollection Authority:\n" +
+    (authority?.address || authority) +
+    "\n\nAuthority verified ✓\n";
 
-status.textContent =
-"Checking Collection authority...";
 
-const collection =
-await fetchCollection(
-umi,
-publicKey(COLLECTION)
-);
+    for(const item of ASSETS){
 
-const collectionAuthority =
-collection.updateAuthority;
+      status.textContent +=
+      "\n====================\n" +
+      item.name +
+      "\n====================\n" +
+      "Checking asset...";
 
-status.textContent +=
-"\n\nCollection Update Authority:\n" +
-JSON.stringify(
-collectionAuthority,
-null,
-2
-);
+      const asset =
+      await fetchAsset(
+        umi,
+        publicKey(item.asset)
+      );
 
-if(
-collectionAuthority?.address &&
-collectionAuthority.address !==
-umi.identity.publicKey.toString()
-){
+      const currentCollection =
+      collectionAddress(asset);
 
-throw new Error(
-"Collection authority does not match connected wallet.\n\n" +
-"Required:\n" +
-collectionAuthority.address +
-"\n\nConnected:\n" +
-umi.identity.publicKey.toString()
-);
+      if(
+        !currentCollection ||
+        currentCollection.toString() !== COLLECTION
+      ){
 
-}
+        throw new Error(
+          item.name +
+          " is not a member of the expected Collection."
+        );
 
-status.textContent +=
-"\n\nAuthority verified ✓\n";
+      }
 
-for(const item of ASSETS){
+      status.textContent +=
+      "\nAsset verified ✓" +
+      "\nCollection verified ✓" +
+      "\nNew Metadata URI:" +
+      "\n" + item.uri +
+      "\n\nRequesting Phantom signature...";
 
-status.textContent +=
-"\n\n====================\n" +
-item.name +
-"\n====================\n" +
-"Preparing update...";
 
-const asset =
-await fetchAsset(
-umi,
-publicKey(item.asset)
-);
+      const result =
+      await update(umi, {
 
-const currentCollection =
-collectionAddress(asset);
+        asset: asset,
+        collection: collection,
+        uri: item.uri
 
-if(!currentCollection){
+      }).sendAndConfirm(umi);
 
-throw new Error(
-item.name +
-" is not inside a Collection."
-);
 
-}
+      status.textContent +=
+      "\nUPDATED ✓" +
+      "\nSignature:\n" +
+      String(result.signature);
 
-if(
-currentCollection.toString() !==
-COLLECTION
-){
+    }
 
-throw new Error(
-item.name +
-" belongs to another Collection."
-);
 
-}
+    status.textContent +=
+    "\n\n====================" +
+    "\nALL 6 UPDATED SUCCESSFULLY ✓" +
+    "\n====================";
 
-status.textContent +=
-"\nAsset verified ✓" +
-"\nCollection verified ✓" +
-"\nRequesting Phantom signature...";
 
-const result =
-await update(umi,{
+  } catch(error) {
 
-asset:asset,
+    console.error(error);
 
-collection:collection,
+    status.textContent +=
+    "\n\n❌ UPDATE FAILED\n\n" +
+    (error?.message || error);
 
-name:item.name,
+    updateBtn.disabled = false;
 
-uri:item.uri
-
-}).sendAndConfirm(umi);
-
-status.textContent +=
-"\n\nUPDATED ✓" +
-"\nSignature:\n" +
-result.signature;
-
-}
-
-status.textContent +=
-"\n\n====================" +
-"\nALL 6 UPDATED SUCCESSFULLY ✓" +
-"\n====================";
-
-} catch(error){
-
-console.error(error);
-
-status.textContent +=
-"\n\n❌ FAILED\n\n" +
-(error?.message || error);
-
-updateBtn.disabled = false;
-
-}
+  }
 
 };
 
