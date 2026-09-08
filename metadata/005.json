@@ -4,9 +4,21 @@
   "description": "Rostam X — The Unbreakable Legend. Guardian #005 of the Persia 2099 Genesis Guardians.",
   "image": "https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafybeifoad3tv6fw3qjsxxomeewv62p2wudqaomjzw5qj4t6hkqc37zsci",
   "attributes": [
-    {"trait_type": "Guardian", "value": "Rostam X"},
-    {"trait_type": "Generation", "value": "Genesis"},
-    {"trait_type": "Guardian Number", "value": "005"},
-    {"trait_type": "Universe", "value": "Persia 2099"}
+    {
+      "trait_type": "Guardian",
+      "value": "Rostam X"
+    },
+    {
+      "trait_type": "Generation",
+      "value": "Genesis"
+    },
+    {
+      "trait_type": "Guardian Number",
+      "value": "005"
+    },
+    {
+      "trait_type": "Universe",
+      "value": "Persia 2099"
+    }
   ]
 }
