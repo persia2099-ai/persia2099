@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Persia 2099 — Genesis Sale</title>
+
+<style>
+*{box-sizing:border-box}
+body{
+margin:0;
+background:#05070b;
+color:#fff;
+font-family:Arial,Helvetica,sans-serif;
+text-align:center;
+}
+.container{
+max-width:1100px;
+margin:auto;
+padding:40px 20px 70px;
+}
+h1{
+font-size:42px;
+letter-spacing:4px;
+margin:20px 0 10px;
+}
+.subtitle{
+color:#9aa4b2;
+font-size:16px;
+margin-bottom:40px;
+}
+.sale-box{
+max-width:620px;
+margin:0 auto 50px;
+padding:30px;
+border:1px solid #263044;
+border-radius:18px;
+background:#0b0f17;
+box-shadow:0 0 35px rgba(90,80,255,.12);
+}
+.sale-box h2{
+margin-top:0;
+letter-spacing:2px;
+}
+.price{
+font-size:34px;
+font-weight:bold;
+margin:20px 0 5px;
+}
+.note{
+color:#8993a5;
+font-size:14px;
+line-height:1.6;
+}
+button,.back{
+display:inline-block;
+border:0;
+border-radius:10px;
+padding:14px 24px;
+font-size:15px;
+font-weight:bold;
+cursor:pointer;
+text-decoration:none;
+margin:8px;
+}
+.connect{
+background:#ffffff;
+color:#05070b;
+}
+.buy{
+background:#7047ff;
+color:white;
+}
+.buy:disabled{
+opacity:.45;
+cursor:not-allowed;
+}
+.status{
+margin-top:18px;
+min-height:24px;
+color:#aeb7c7;
+font-size:14px;
+}
+.guardians{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:20px;
+}
+.card{
+background:#0b0f17;
+border:1px solid #20293a;
+border-radius:16px;
+padding:15px;
+}
+.card img{
+width:100%;
+aspect-ratio:1/1;
+object-fit:cover;
+border-radius:12px;
+display:block;
+}
+.card h3{
+margin:14px 0 5px;
+letter-spacing:1px;
+}
+.card p{
+margin:0;
+color:#8993a5;
+font-size:13px;
+}
+.back{
+margin-top:45px;
+border:1px solid #30394d;
+color:#fff;
+background:#0b0f17;
+}
+
+@media(max-width:700px){
+h1{font-size:30px}
+.guardians{grid-template-columns:1fr}
+.sale-box{padding:22px}
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1>GENESIS SALE</h1>
+<div class="subtitle">
+PERSIA 2099 — GENESIS GUARDIANS
+</div>
+
+<div class="sale-box">
+
+<h2>THE GENESIS COLLECTION</h2>
+
+<div class="price">COMING SOON</div>
+
+<p class="note">
+Six Guardians. One legacy.<br>
+The public Genesis launch will be activated after final testing.
+</p>
+
+<button class="connect" id="connectBtn">
+CONNECT PHANTOM
+</button>
+
+<button class="buy" id="buyBtn" disabled>
+BUY GENESIS
+</button>
+
+<div class="status" id="status">
+Wallet not connected.
+</div>
+
+</div>
+
+<div class="guardians">
+
+<div class="card">
+<img src="./arash-2099.png" alt="Arash 2099">
+<h3>#001 ARASH 2099</h3>
+<p>THE CYBER WARRIOR</p>
+</div>
+
+<div class="card">
+<img src="./cyrus-prime.png" alt="Cyrus Prime">
+<h3>#002 CYRUS PRIME</h3>
+<p>THE DIGITAL KING</p>
+</div>
+
+<div class="card">
+<img src="./mithra.png" alt="Mithra">
+<h3>#003 MITHRA</h3>
+<p>THE GUARDIAN OF LIGHT</p>
+</div>
+
+<div class="card">
+<img src="./Anahita.png" alt="Anahita">
+<h3>#004 ANAHITA</h3>
+<p>THE CYBER GODDESS</p>
+</div>
+
+<div class="card">
+<img src="./rostam-x.png" alt="Rostam X">
+<h3>#005 ROSTAM X</h3>
+<p>THE UNBREAKABLE LEGEND</p>
+</div>
+
+<div class="card">
+<img src="./darius-zero.png" alt="Darius Zero">
+<h3>#006 DARIUS ZERO</h3>
+<p>THE ETERNAL SOVEREIGN</p>
+</div>
+
+</div>
+
+<a class="back" href="index.html">← BACK TO PERSIA 2099</a>
+
+</div>
+
+<script>
+const connectBtn = document.getElementById("connectBtn");
+const buyBtn = document.getElementById("buyBtn");
+const status = document.getElementById("status");
+
+let wallet = null;
+
+connectBtn.addEventListener("click", async () => {
+
+try {
+
+if(!window.solana || !window.solana.isPhantom){
+status.textContent = "Phantom wallet not detected.";
+return;
+}
+
+const response = await window.solana.connect();
+wallet = response.publicKey.toString();
+
+status.textContent =
+"Connected: " +
+wallet.slice(0,6) +
+"..." +
+wallet.slice(-6);
+
+buyBtn.disabled = false;
+
+} catch(error){
+
+status.textContent = "Wallet connection cancelled.";
+
+}
+
+});
+
+buyBtn.addEventListener("click", () => {
+
+status.textContent =
+"Genesis purchase is not activated yet. Final launch testing is in progress.";
+
+});
+
+</script>
+
+</body>
+</html>
