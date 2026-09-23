@@ -72,13 +72,10 @@ createButton.onclick=async()=>{
   // Core requires a fresh signer for the Collection account.
   // Use a noop signer while building so Phantom is the first signer.
   const collection=generateSigner(umi);
-  const collectionNoop=createNoopSigner(collection.publicKey);
-
   umi.use(signerIdentity(walletNoop));
 
   const builder=createCollection(umi,{
-   collection:collectionNoop,
-   payer:walletNoop,
+   collection,
    name:"Persia 2099 — Genesis Guardians",
    uri:URI,
    plugins:[{
@@ -89,8 +86,7 @@ createButton.onclick=async()=>{
    }]
   }).useLegacyVersion().setFeePayer(walletPk);
 
-  const latestBlockhash=await umi.rpc.getLatestBlockhash();
-  const txUmi=builder.setBlockhash(latestBlockhash).build(umi);
+  const txUmi=await builder.buildWithLatestBlockhash(umi);
   const txWeb3=toWeb3JsTransaction(txUmi);
 
   const simulation=await connection.simulateTransaction(txWeb3,{sigVerify:false});
