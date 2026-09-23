@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Persia 2099 — Mainnet Collection</title>
+<style>
+body{margin:0;background:#07080c;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
+.box{width:90%;max-width:460px;padding:30px;text-align:center;background:#10131b;border:1px solid #293247;border-radius:18px}
+img{width:100%;border-radius:14px;margin:15px 0 20px}
+button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer}
+#connect{background:#fff;color:#000}#create{background:#7047ff;color:#fff}button:disabled{opacity:.5}
+#status{margin-top:20px;line-height:1.5;word-break:break-word}a{color:#a980ff}
+</style>
+</head>
+<body>
+<div class="box">
+<h1>PERSIA 2099</h1>
+<h2>GENESIS GUARDIANS</h2>
+<img src="https://persia2099-ai.github.io/persia2099/arash-2099.png" alt="Persia 2099">
+<p>Mainnet Collection Creation</p>
+<button id="connect">CONNECT PHANTOM</button>
+<button id="create" disabled>CREATE MAINNET COLLECTION</button>
+<div id="status">Wallet not connected.</div>
+</div>
+<script type="module">
+import { generateSigner } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+import { createCollection, mplCore, ruleSet } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
+import { createUmi } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+import { walletAdapterIdentity } from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
+import { PhantomWalletAdapter } from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+
+const RPC="https://api.mainnet-beta.solana.com";
+const URI="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreid2ozmgxjfc6xf4a6r4hvnxnzasnq24cimykprq6jevhxiksunhfi";
+const status=document.getElementById("status");
+const connectButton=document.getElementById("connect");
+const createButton=document.getElementById("create");
+const wallet=new PhantomWalletAdapter();
+const umi=createUmi(RPC).use(mplCore());
+
+connectButton.onclick=async()=>{
+ try{
+  status.innerText="Connecting Phantom...";
+  await wallet.connect();
+  umi.use(walletAdapterIdentity(wallet));
+  status.innerText="Connected:\n"+wallet.publicKey.toBase58();
+  connectButton.innerText="PHANTOM CONNECTED";
+  createButton.disabled=false;
+ }catch(e){status.innerText="Connection failed:\n"+(e?.message||e);}
+};
+
+createButton.onclick=async()=>{
+ try{
+  createButton.disabled=true;
+  status.innerText="Preparing Mainnet Collection...\n\nConfirm only if Phantom shows the expected transaction.";
+  const collection=generateSigner(umi);
+  const creator=wallet.publicKey;
+  await createCollection(umi,{
+   collection,
+   name:"Persia 2099 — Genesis Guardians",
+   uri:URI,
+   plugins:[{
+    type:"Royalties",
+    basisPoints:500,
+    creators:[{address:creator,percentage:100}],
+    ruleSet:ruleSet("None")
+   }]
+  }).sendAndConfirm(umi);
+  status.innerHTML="<strong>COLLECTION CREATED</strong><br><br>Collection:<br>"+collection.publicKey.toString()+"<br><br><a target='_blank' href='https://explorer.solana.com/address/"+collection.publicKey.toString()+"'>View on Solana Explorer</a>";
+ }catch(e){
+  console.error(e);
+  status.innerText="Collection creation failed:\n\n"+(e?.message||e);
+  createButton.disabled=false;
+ }
+};
+</script>
+</body>
+</html>
