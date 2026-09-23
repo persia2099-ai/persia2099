@@ -89,7 +89,8 @@ createButton.onclick=async()=>{
    }]
   }).useLegacyVersion().setFeePayer(walletPk);
 
-  const txUmi=await builder.buildWithLatestBlockhash(umi);
+  const latestBlockhash=await umi.rpc.getLatestBlockhash();
+  const txUmi=builder.setBlockhash(latestBlockhash).build(umi);
   const txWeb3=toWeb3JsTransaction(txUmi);
 
   const simulation=await connection.simulateTransaction(txWeb3,{sigVerify:false});
@@ -109,15 +110,14 @@ createButton.onclick=async()=>{
   const signature=await umi.rpc.sendTransaction(fullySigned);
 
   await umi.rpc.confirmTransaction(signature,{
-   strategy:{type:"blockhash",...txUmi.blockhash},
+   strategy:{type:"blockhash",...latestBlockhash},
    commitment:"confirmed"
   });
 
-  const sigText=Array.from(signature).map(b=>String.fromCharCode(b)).join("");
   const collectionAddress=collection.publicKey.toString();
 
   status.innerHTML="<strong>COLLECTION CREATED</strong><br><br>Collection:<br>"+collectionAddress+
-   "<br><br>Transaction submitted.<br><a target='_blank' href='https://explorer.solana.com/address/"+collectionAddress+"'>View Collection</a>";
+   "<br><br>Transaction confirmed.<br><a target='_blank' href='https://explorer.solana.com/address/"+collectionAddress+"'>View Collection</a>";
  }catch(e){
   console.error(e);
   status.innerText="Collection creation failed:\n\n"+(e?.message||e);
