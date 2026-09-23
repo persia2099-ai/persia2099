@@ -24,49 +24,100 @@ button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;font-
 <div id="status">Wallet not connected.</div>
 </div>
 <script type="module">
-import { generateSigner } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+import { generateSigner, createNoopSigner, publicKey, signerIdentity } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 import { createCollection, mplCore, ruleSet } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 import { createUmi } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
-import { walletAdapterIdentity } from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.1.1";
-import { PhantomWalletAdapter } from "https://esm.sh/@solana/wallet-adapter-phantom@0.9.28";
+import { toWeb3JsTransaction, fromWeb3JsTransaction } from "https://esm.sh/@metaplex-foundation/umi-web3js-adapters@1.1.0";
+import { Connection } from "https://esm.sh/@solana/web3.js@1.98.4";
 
 const RPC="https://rpc.solanatracker.io/public";
 const URI="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreid2ozmgxjfc6xf4a6r4hvnxnzasnq24cimykprq6jevhxiksunhfi";
 const status=document.getElementById("status");
 const connectButton=document.getElementById("connect");
 const createButton=document.getElementById("create");
-const wallet=new PhantomWalletAdapter();
+const provider=window.phantom?.solana;
+const connection=new Connection(RPC,"confirmed");
 const umi=createUmi(RPC).use(mplCore());
+
+if(!provider){
+ status.innerText="Phantom provider not found. Open this page inside Phantom.";
+}
 
 connectButton.onclick=async()=>{
  try{
+  if(!provider) throw new Error("Phantom provider not found.");
   status.innerText="Connecting Phantom...";
-  await wallet.connect();
-  umi.use(walletAdapterIdentity(wallet));
-  status.innerText="Connected:\n"+wallet.publicKey.toBase58();
+  const result=await provider.connect();
+  const walletAddress=result?.publicKey?.toBase58?.()||provider.publicKey?.toBase58?.();
+  if(!walletAddress) throw new Error("Phantom did not return a wallet address.");
+  status.innerText="Connected:\n"+walletAddress;
   connectButton.innerText="PHANTOM CONNECTED";
   createButton.disabled=false;
- }catch(e){status.innerText="Connection failed:\n"+(e?.message||e);}
+ }catch(e){
+  console.error(e);
+  status.innerText="Connection failed:\n"+(e?.message||e);
+ }
 };
 
 createButton.onclick=async()=>{
  try{
   createButton.disabled=true;
-  status.innerText="Preparing Mainnet Collection...\n\nConfirm only if Phantom shows the expected transaction.";
+  if(!provider?.publicKey) throw new Error("Connect Phantom first.");
+
+  status.innerText="Building and simulating transaction...";
+
+  const walletPk=publicKey(provider.publicKey.toBase58());
+  const walletNoop=createNoopSigner(walletPk);
+
+  // Core requires a fresh signer for the Collection account.
+  // Use a noop signer while building so Phantom is the first signer.
   const collection=generateSigner(umi);
-  const creator=wallet.publicKey;
-  await createCollection(umi,{
-   collection,
+  const collectionNoop=createNoopSigner(collection.publicKey);
+
+  umi.use(signerIdentity(walletNoop));
+
+  const builder=createCollection(umi,{
+   collection:collectionNoop,
+   payer:walletNoop,
    name:"Persia 2099 — Genesis Guardians",
    uri:URI,
    plugins:[{
     type:"Royalties",
     basisPoints:500,
-    creators:[{address:creator,percentage:100}],
+    creators:[{address:walletPk,percentage:100}],
     ruleSet:ruleSet("None")
    }]
-  }).sendAndConfirm(umi);
-  status.innerHTML="<strong>COLLECTION CREATED</strong><br><br>Collection:<br>"+collection.publicKey.toString()+"<br><br><a target='_blank' href='https://explorer.solana.com/address/"+collection.publicKey.toString()+"'>View on Solana Explorer</a>";
+  }).useLegacyVersion().setFeePayer(walletPk);
+
+  const txUmi=await builder.buildWithLatestBlockhash(umi);
+  const txWeb3=toWeb3JsTransaction(txUmi);
+
+  const simulation=await connection.simulateTransaction(txWeb3,{sigVerify:false});
+  if(simulation.value.err){
+   const logs=simulation.value.logs?.join("\n")||"No simulation logs.";
+   throw new Error("Preflight simulation failed:\n"+JSON.stringify(simulation.value.err)+"\n\n"+logs);
+  }
+
+  status.innerText="Simulation passed. Phantom will now sign.\n\nCheck the transaction details before approving.";
+
+  // Phantom signs first; the fresh Collection keypair signs second.
+  const phantomSigned=await provider.signTransaction(txWeb3);
+  const partiallySigned=fromWeb3JsTransaction(phantomSigned);
+  const fullySigned=await collection.signTransaction(partiallySigned);
+
+  status.innerText="Sending transaction...";
+  const signature=await umi.rpc.sendTransaction(fullySigned);
+
+  await umi.rpc.confirmTransaction(signature,{
+   strategy:{type:"blockhash",...txUmi.blockhash},
+   commitment:"confirmed"
+  });
+
+  const sigText=Array.from(signature).map(b=>String.fromCharCode(b)).join("");
+  const collectionAddress=collection.publicKey.toString();
+
+  status.innerHTML="<strong>COLLECTION CREATED</strong><br><br>Collection:<br>"+collectionAddress+
+   "<br><br>Transaction submitted.<br><a target='_blank' href='https://explorer.solana.com/address/"+collectionAddress+"'>View Collection</a>";
  }catch(e){
   console.error(e);
   status.innerText="Collection creation failed:\n\n"+(e?.message||e);
