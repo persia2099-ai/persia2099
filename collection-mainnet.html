@@ -105,10 +105,7 @@ createButton.onclick=async()=>{
   status.innerText="Sending transaction...";
   const signature=await umi.rpc.sendTransaction(fullySigned);
 
-  await umi.rpc.confirmTransaction(signature,{
-   strategy:{type:"blockhash",...latestBlockhash},
-   commitment:"confirmed"
-  });
+  await connection.confirmTransaction(signature,"confirmed");
 
   const collectionAddress=collection.publicKey.toString();
 
