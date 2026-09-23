@@ -27,7 +27,7 @@ button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;font-
 import { generateSigner, createNoopSigner, publicKey, signerIdentity } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 import { createCollection, mplCore, ruleSet } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 import { createUmi } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
-import { toWeb3JsTransaction, fromWeb3JsTransaction } from "https://esm.sh/@metaplex-foundation/umi-web3js-adapters@1.4.1";
+import { toWeb3JsInstruction, toWeb3JsKeypair } from "https://esm.sh/@metaplex-foundation/umi-web3js-adapters@1.4.1";
 import { Connection } from "https://esm.sh/@solana/web3.js@1.98.4";
 
 const RPC="https://rpc.solanatracker.io/public";
@@ -64,13 +64,13 @@ createButton.onclick=async()=>{
   createButton.disabled=true;
   if(!provider?.publicKey) throw new Error("Connect Phantom first.");
 
-  status.innerText="Building and simulating transaction...";
+  status.innerText="Building transaction...";
 
   const walletPk=publicKey(provider.publicKey.toBase58());
   const walletNoop=createNoopSigner(walletPk);
 
-  // Core requires a fresh signer for the Collection account.
-  // Use a noop signer while building so Phantom is the first signer.
+  // Build only the Core instructions with Umi.
+  // The final transaction is assembled and signed as a native web3.js transaction.
   const collection=generateSigner(umi);
   umi.use(signerIdentity(walletNoop));
 
@@ -84,12 +84,23 @@ createButton.onclick=async()=>{
     creators:[{address:walletPk,percentage:100}],
     ruleSet:ruleSet("None")
    }]
-  }).useLegacyVersion().setFeePayer(walletPk);
+  });
 
-  const txUmi=await builder.buildWithLatestBlockhash(umi);
-  const txWeb3=toWeb3JsTransaction(txUmi);
+  const umiInstructions=builder.getInstructions();
+  const web3Instructions=umiInstructions.map(toWeb3JsInstruction);
 
-  const simulation=await connection.simulateTransaction(txWeb3,{sigVerify:false});
+  const latest=await connection.getLatestBlockhash("confirmed");
+  const tx=new (await import("https://esm.sh/@solana/web3.js@1.98.4")).Transaction({
+   feePayer:new (await import("https://esm.sh/@solana/web3.js@1.98.4")).PublicKey(provider.publicKey.toBase58()),
+   recentBlockhash:latest.blockhash,
+  });
+  tx.add(...web3Instructions);
+
+  // The new Collection account must sign, then Phantom signs for the wallet.
+  const collectionWeb3=toWeb3JsKeypair(collection);
+  tx.partialSign(collectionWeb3);
+
+  const simulation=await connection.simulateTransaction(tx,{sigVerify:false});
   if(simulation.value.err){
    const logs=simulation.value.logs?.join("\n")||"No simulation logs.";
    throw new Error("Preflight simulation failed:\n"+JSON.stringify(simulation.value.err)+"\n\n"+logs);
@@ -97,15 +108,15 @@ createButton.onclick=async()=>{
 
   status.innerText="Simulation passed. Phantom will now sign.\n\nCheck the transaction details before approving.";
 
-  // Phantom signs first; the fresh Collection keypair signs second.
-  const phantomSigned=await provider.signTransaction(txWeb3);
-  const partiallySigned=fromWeb3JsTransaction(phantomSigned);
-  const fullySigned=await collection.signTransaction(partiallySigned);
+  const signed=await provider.signTransaction(tx);
 
   status.innerText="Sending transaction...";
-  const signature=await umi.rpc.sendTransaction(fullySigned);
-
-  await connection.confirmTransaction(signature,"confirmed");
+  const signature=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false});
+  await connection.confirmTransaction({
+   signature,
+   blockhash:latest.blockhash,
+   lastValidBlockHeight:latest.lastValidBlockHeight
+  },"confirmed");
 
   const collectionAddress=collection.publicKey.toString();
 
@@ -116,7 +127,6 @@ createButton.onclick=async()=>{
   status.innerText="Collection creation failed:\n\n"+(e?.message||e);
   createButton.disabled=false;
  }
-};
-</script>
+}</script>
 </body>
 </html>
