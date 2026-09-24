@@ -27,7 +27,7 @@ button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;font-
 import { generateSigner, createNoopSigner, publicKey, signerIdentity } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
 import { createCollection, mplCore } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 import { createUmi } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
-import { toWeb3JsInstruction, toWeb3JsKeypair } from "https://esm.sh/@metaplex-foundation/umi-web3js-adapters@1.4.1";
+import { toWeb3JsTransaction, toWeb3JsKeypair } from "https://esm.sh/@metaplex-foundation/umi-web3js-adapters@1.4.1";
 import { Connection } from "https://esm.sh/@solana/web3.js@1.98.4";
 
 const RPC="https://rpc.solanatracker.io/public";
@@ -83,17 +83,11 @@ createButton.onclick=async()=>{
    uri:URI
   });
 
-  const umiInstructions=builder.getInstructions();
-  const web3Instructions=umiInstructions.map(toWeb3JsInstruction);
+  // Build the complete Umi transaction, then convert it with the official adapter.
+  const umiTransaction=await builder.useLegacyVersion().build(umi);
+  const tx=toWeb3JsTransaction(umiTransaction);
 
-  const latest=await connection.getLatestBlockhash("confirmed");
-  const tx=new (await import("https://esm.sh/@solana/web3.js@1.98.4")).Transaction({
-   feePayer:new (await import("https://esm.sh/@solana/web3.js@1.98.4")).PublicKey(provider.publicKey.toBase58()),
-   recentBlockhash:latest.blockhash,
-  });
-  tx.add(...web3Instructions);
-
-  // The new Collection account must sign, then Phantom signs for the wallet.
+  // The collection account is a second signer; Phantom will sign for the wallet.
   const collectionWeb3=toWeb3JsKeypair(collection);
   tx.partialSign(collectionWeb3);
 
