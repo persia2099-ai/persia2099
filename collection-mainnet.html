@@ -69,13 +69,9 @@ createButton.onclick=async()=>{
   const walletPk=publicKey(provider.publicKey.toBase58());
   const walletNoop=createNoopSigner(walletPk);
 
-  // Build only the Core instructions with Umi.
-  // The final transaction is assembled and signed as a native web3.js transaction.
   const collection=generateSigner(umi);
   umi.use(signerIdentity(walletNoop));
 
-  // Create the Core Collection first with the minimum supported arguments.
-  // Royalties will be added in a separate verified step after creation.
   const builder=createCollection(umi,{
    collection,
    updateAuthority:walletPk,
@@ -83,11 +79,17 @@ createButton.onclick=async()=>{
    uri:URI
   });
 
-  // Build the complete Umi transaction, then convert it with the official adapter.
-  const umiTransaction=await builder.useLegacyVersion().build(umi);
+  // Umi requires a recent blockhash before build.
+  // Fetch it once and use the same blockhash for confirmation.
+  const latest=await umi.rpc.getLatestBlockhash();
+  const umiTransaction=await builder
+   .useLegacyVersion()
+   .setBlockhash(latest)
+   .build(umi);
+
   const tx=toWeb3JsTransaction(umiTransaction);
 
-  // The collection account is a second signer; Phantom will sign for the wallet.
+  // The new Collection account is a second signer.
   const collectionWeb3=toWeb3JsKeypair(collection);
   tx.partialSign(collectionWeb3);
 
@@ -103,6 +105,7 @@ createButton.onclick=async()=>{
 
   status.innerText="Sending transaction...";
   const signature=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false});
+
   await connection.confirmTransaction({
    signature,
    blockhash:latest.blockhash,
@@ -118,6 +121,7 @@ createButton.onclick=async()=>{
   status.innerText="Collection creation failed:\n\n"+(e?.message||e);
   createButton.disabled=false;
  }
-}</script>
+};
+</script>
 </body>
 </html>
