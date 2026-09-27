@@ -4,124 +4,289 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>Persia 2099 — Mainnet Collection</title>
+
 <style>
-body{margin:0;background:#07080c;color:#fff;font-family:Arial,sans-serif;display:flex;justify-content:center;align-items:center;min-height:100vh}
-.box{width:90%;max-width:460px;padding:30px;text-align:center;background:#10131b;border:1px solid #293247;border-radius:18px}
-img{width:100%;border-radius:14px;margin:15px 0 20px}
-button{width:100%;padding:14px;margin-top:10px;border:0;border-radius:10px;font-weight:bold;font-size:16px;cursor:pointer}
-#connect{background:#fff;color:#000}#create{background:#7047ff;color:#fff}button:disabled{opacity:.5}
-#status{margin-top:20px;line-height:1.5;word-break:break-word}a{color:#a980ff}
+body{
+ margin:0;
+ background:#07080c;
+ color:#fff;
+ font-family:Arial,sans-serif;
+ display:flex;
+ justify-content:center;
+ align-items:center;
+ min-height:100vh
+}
+.box{
+ width:90%;
+ max-width:460px;
+ padding:30px;
+ text-align:center;
+ background:#10131b;
+ border:1px solid #293247;
+ border-radius:18px
+}
+img{
+ width:100%;
+ border-radius:14px;
+ margin:15px 0 20px
+}
+button{
+ width:100%;
+ padding:14px;
+ margin-top:10px;
+ border:0;
+ border-radius:10px;
+ font-weight:bold;
+ font-size:16px;
+ cursor:pointer
+}
+#connect{
+ background:#fff;
+ color:#000
+}
+#create{
+ background:#7047ff;
+ color:#fff
+}
+button:disabled{
+ opacity:.5
+}
+#status{
+ margin-top:20px;
+ line-height:1.5;
+ word-break:break-word
+}
+a{
+ color:#a980ff
+}
 </style>
 </head>
+
 <body>
+
 <div class="box">
+
 <h1>PERSIA 2099</h1>
 <h2>GENESIS GUARDIANS</h2>
-<img src="https://persia2099-ai.github.io/persia2099/arash-2099.png" alt="Persia 2099">
-<p>Mainnet Collection Creation</p>
-<button id="connect">CONNECT PHANTOM</button>
-<button id="create" disabled>CREATE MAINNET COLLECTION</button>
-<div id="status">Wallet not connected.</div>
-</div>
-<script type="module">
-import { generateSigner, createNoopSigner, publicKey, signerIdentity } from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
-import { createCollection, mplCore } from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
-import { createUmi } from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
-import { toWeb3JsTransaction, toWeb3JsKeypair } from "https://esm.sh/@metaplex-foundation/umi-web3js-adapters@1.4.1";
-import { Connection } from "https://esm.sh/@solana/web3.js@1.98.4";
 
-const RPC="https://rpc.solanatracker.io/public";
-const URI="https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreid2ozmgxjfc6xf4a6r4hvnxnzasnq24cimykprq6jevhxiksunhfi";
-const status=document.getElementById("status");
-const connectButton=document.getElementById("connect");
-const createButton=document.getElementById("create");
-const provider=window.phantom?.solana;
-const connection=new Connection(RPC,"confirmed");
-const umi=createUmi(RPC).use(mplCore());
+<img
+src="https://persia2099-ai.github.io/persia2099/arash-2099.png"
+alt="Persia 2099"
+>
+
+<p>Mainnet Collection Creation</p>
+
+<button id="connect">
+CONNECT PHANTOM
+</button>
+
+<button id="create" disabled>
+CREATE MAINNET COLLECTION
+</button>
+
+<div id="status">
+Wallet not connected.
+</div>
+
+</div>
+
+<script type="module">
+
+import {
+ generateSigner
+} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
+
+import {
+ createCollection,
+ mplCore
+} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
+
+import {
+ createUmi
+} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
+
+import {
+ walletAdapterIdentity
+} from "https://esm.sh/@metaplex-foundation/umi-signer-wallet-adapters@1.4.1";
+
+
+const RPC =
+"https://rpc.solanatracker.io/public";
+
+const URI =
+"https://amaranth-eldest-duck-598.mypinata.cloud/ipfs/bafkreid2ozmgxjfc6xf4a6r4hvnxnzasnq24cimykprq6jevhxiksunhfi";
+
+
+const status =
+document.getElementById("status");
+
+const connectButton =
+document.getElementById("connect");
+
+const createButton =
+document.getElementById("create");
+
+
+const provider =
+window.phantom?.solana;
+
 
 if(!provider){
- status.innerText="Phantom provider not found. Open this page inside Phantom.";
+
+ status.innerText =
+ "Phantom provider not found. Open this page inside Phantom.";
+
 }
 
-connectButton.onclick=async()=>{
+
+connectButton.onclick = async () => {
+
  try{
-  if(!provider) throw new Error("Phantom provider not found.");
-  status.innerText="Connecting Phantom...";
-  const result=await provider.connect();
-  const walletAddress=result?.publicKey?.toBase58?.()||provider.publicKey?.toBase58?.();
-  if(!walletAddress) throw new Error("Phantom did not return a wallet address.");
-  status.innerText="Connected:\n"+walletAddress;
-  connectButton.innerText="PHANTOM CONNECTED";
-  createButton.disabled=false;
+
+  if(!provider)
+   throw new Error("Phantom provider not found.");
+
+  status.innerText =
+   "Connecting Phantom...";
+
+  const result =
+   await provider.connect();
+
+  const wallet =
+   result?.publicKey ||
+   provider.publicKey;
+
+  if(!wallet)
+   throw new Error(
+    "Phantom did not return wallet address."
+   );
+
+  status.innerText =
+   "Connected:\n" +
+   wallet.toBase58();
+
+  connectButton.innerText =
+   "PHANTOM CONNECTED";
+
+  createButton.disabled =
+   false;
+
  }catch(e){
+
   console.error(e);
-  status.innerText="Connection failed:\n"+(e?.message||e);
+
+  status.innerText =
+   "Connection failed:\n" +
+   (e?.message || e);
+
  }
+
 };
 
-createButton.onclick=async()=>{
+
+createButton.onclick = async () => {
+
  try{
-  createButton.disabled=true;
-  if(!provider?.publicKey) throw new Error("Connect Phantom first.");
 
-  status.innerText="Building transaction...";
+  createButton.disabled =
+   true;
 
-  const walletPk=publicKey(provider.publicKey.toBase58());
-  const walletNoop=createNoopSigner(walletPk);
+  if(!provider?.publicKey)
+   throw new Error(
+    "Connect Phantom first."
+   );
 
-  const collection=generateSigner(umi);
-  umi.use(signerIdentity(walletNoop));
 
-  const builder=createCollection(umi,{
-   collection,
-   updateAuthority:walletPk,
-   name:"Persia 2099 — Genesis Guardians",
-   uri:URI
-  });
+  status.innerText =
+   "Preparing Mainnet Collection transaction...";
 
-  // Umi requires a recent blockhash before build.
-  // Fetch it once and use the same blockhash for confirmation.
-  const latest=await umi.rpc.getLatestBlockhash();
-  const umiTransaction=await builder
-   .useLegacyVersion()
-   .setBlockhash(latest)
-   .build(umi);
 
-  const tx=toWeb3JsTransaction(umiTransaction);
+  /*
+   * Umi uses Phantom directly.
+   * No manual Web3 transaction.
+   * No partialSign.
+   * No manual blockhash.
+   */
 
-  // The new Collection account is a second signer.
-  const collectionWeb3=toWeb3JsKeypair(collection);
-  tx.partialSign(collectionWeb3);
+  const umi =
+   createUmi(RPC)
+   .use(mplCore())
+   .use(
+    walletAdapterIdentity(provider)
+   );
 
-  const simulation=await connection.simulateTransaction(tx,{sigVerify:false});
-  if(simulation.value.err){
-   const logs=simulation.value.logs?.join("\n")||"No simulation logs.";
-   throw new Error("Preflight simulation failed:\n"+JSON.stringify(simulation.value.err)+"\n\n"+logs);
-  }
 
-  status.innerText="Simulation passed. Phantom will now sign.\n\nCheck the transaction details before approving.";
+  /*
+   * IMPORTANT:
+   * A completely new signer is generated
+   * for this Collection.
+   */
 
-  const signed=await provider.signTransaction(tx);
+  const collection =
+   generateSigner(umi);
 
-  status.innerText="Sending transaction...";
-  const signature=await connection.sendRawTransaction(signed.serialize(),{skipPreflight:false});
 
-  await connection.confirmTransaction({
-   signature,
-   blockhash:latest.blockhash,
-   lastValidBlockHeight:latest.lastValidBlockHeight
-  },"confirmed");
+  status.innerText =
+   "Ready.\n\n" +
+   "Collection:\n" +
+   "Persia 2099 — Genesis Guardians\n\n" +
+   "Preparing Phantom approval...";
 
-  const collectionAddress=collection.publicKey.toString();
 
-  status.innerHTML="<strong>COLLECTION CREATED</strong><br><br>Collection:<br>"+collectionAddress+
-   "<br><br>Transaction confirmed.<br><a target='_blank' href='https://explorer.solana.com/address/"+collectionAddress+"'>View Collection</a>";
+  const result =
+   await createCollection(
+    umi,
+    {
+     collection,
+     name:
+      "Persia 2099 — Genesis Guardians",
+     uri:
+      URI
+    }
+   )
+   .sendAndConfirm(umi);
+
+
+  const address =
+   collection.publicKey.toString();
+
+
+  const signature =
+   result.signature;
+
+
+  status.innerHTML =
+   "<strong>COLLECTION CREATED</strong>" +
+   "<br><br>" +
+   "Collection Address:<br>" +
+   address +
+   "<br><br>" +
+   "Transaction:<br>" +
+   signature +
+   "<br><br>" +
+   "<a target='_blank' href='https://explorer.solana.com/address/" +
+   address +
+   "'>" +
+   "VIEW COLLECTION" +
+   "</a>";
+
+
  }catch(e){
+
   console.error(e);
-  status.innerText="Collection creation failed:\n\n"+(e?.message||e);
-  createButton.disabled=false;
+
+  status.innerText =
+   "Collection creation failed:\n\n" +
+   (e?.message || e);
+
+  createButton.disabled =
+   false;
+
  }
+
 };
+
 </script>
+
 </body>
 </html>
