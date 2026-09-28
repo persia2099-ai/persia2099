@@ -1,55 +1,22 @@
 <!doctype html>
-<html lang="en">
-<head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>Persia 2099 — Devnet Asset Verifier</title>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Persia 2099 — Verify All Devnet Guardians</title>
 <style>
-body{font-family:Arial,sans-serif;background:#0b0b10;color:#eee;max-width:900px;margin:0 auto;padding:24px}
-.card{background:#15151d;border:1px solid #333;border-radius:16px;padding:18px;margin:16px 0}
-img{max-width:100%;max-height:520px;border-radius:12px;display:block;margin:16px auto}
-code,pre{word-break:break-all;white-space:pre-wrap}
-.ok{color:#8cffb0}.err{color:#ff8c8c}
-button{padding:12px 18px;border:0;border-radius:10px;font-weight:700}
-</style>
-</head>
-<body>
-<h1>Persia 2099 — Devnet Asset Verifier</h1>
-<div class="card">
-<div id="status">Reading Arash #001 from Devnet…</div>
-<div id="data"></div>
-<img id="assetImage" alt="Arash 2099 main NFT image" style="display:none">
-</div>
+body{font-family:Arial,sans-serif;background:#0b0b10;color:#eee;max-width:1100px;margin:auto;padding:20px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px}.card{background:#15151d;border:1px solid #333;border-radius:14px;padding:16px}.ok{border-color:#318a52}.bad{border-color:#a33}img{width:100%;aspect-ratio:1;object-fit:contain;background:#000;border-radius:10px;margin-top:12px}code{word-break:break-all;color:#aaa}.status{padding:14px;border:1px solid #333;border-radius:12px;margin-bottom:18px}
+</style></head><body>
+<h1>Persia 2099 — Devnet NFT Verification</h1><div id="status" class="status">Checking all 6 Guardians…</div><div id="grid" class="grid"></div>
 <script type="module">
 import {createUmi} from "https://esm.sh/@metaplex-foundation/umi-bundle-defaults@1.4.1";
 import {mplCore,fetchAsset} from "https://esm.sh/@metaplex-foundation/mpl-core@1.9.0";
 import {publicKey} from "https://esm.sh/@metaplex-foundation/umi@1.4.1";
-
-const RPC="https://api.devnet.solana.com";
-const ASSET="D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU";
-const umi=createUmi(RPC).use(mplCore());
-const status=document.getElementById("status");
-const data=document.getElementById("data");
-const img=document.getElementById("assetImage");
-
-try{
-  const asset=await fetchAsset(umi,publicKey(ASSET));
-  const metadata=await fetch(asset.uri).then(r=>{
-    if(!r.ok) throw new Error("Metadata HTTP "+r.status);
-    return r.json();
-  });
-  status.innerHTML='<span class="ok">✓ Asset and off-chain metadata loaded</span>';
-  data.innerHTML=
-    "<p><b>Name:</b> "+(asset.name||"")+"</p>"+
-    "<p><b>Asset:</b> <code>"+ASSET+"</code></p>"+
-    "<p><b>Metadata URI:</b> <code>"+asset.uri+"</code></p>"+
-    "<p><b>Image URI:</b> <code>"+(metadata.image||"")+"</code></p>"+
-    "<p><b>Metadata:</b></p><pre>"+JSON.stringify(metadata,null,2).replace(/</g,"&lt;")+"</pre>";
-  if(metadata.image){img.src=metadata.image;img.style.display="block";}
-}catch(e){
-  status.innerHTML='<span class="err">✗ '+String(e.message||e)+'</span>';
-  data.innerHTML="<p>Could not read the Devnet asset or its metadata.</p>";
-}
-</script>
-</body>
-</html>
+const umi=createUmi("https://api.devnet.solana.com").use(mplCore());
+const assets=[
+["#001","D4CBoNmuCm2GDSwJi2YHyxTMte66nJGNYE55WJWa4kzU"],["#002","47KQo8ddMP2q6z3zzs1E85f24cRgEFCe52iudvY2eG2K"],
+["#003","3ZUJcmFQMcGbk4MdAeGoY3DLkY1us2hxbbFNzeD1H9mZ"],["#004","BmUjwD3D3bPDYGu7hoR38VNNnhbcSxBwJgnRxkFpCxGk"],
+["#005","9xHiNWXKfuhE2rVvCZXqNmD2gSLKj4KwRbRTTbLf2StS"],["#006","sFGhKnzJfbbnFTbiVMp93H4iamP1cJMhbfMydppjp6F"]];
+async function check(x){try{const a=await fetchAsset(umi,publicKey(x[1]));const m=await fetch(a.uri).then(r=>{if(!r.ok)throw Error("HTTP "+r.status);return r.json()});if(!m.image)throw Error("No image URI");return {ok:true,n:x[0],a,m}}catch(e){return {ok:false,n:x[0],addr:x[1],e:String(e.message||e)}}}
+const results=await Promise.all(assets.map(check));let good=0;const grid=document.getElementById("grid");
+for(const r of results){const c=document.createElement("div");c.className="card "+(r.ok?"ok":"bad");if(r.ok){good++;c.innerHTML="<h2>"+r.n+" — "+r.a.name+"</h2><p>✓ Asset loaded<br>✓ Metadata loaded<br>✓ Image URI found</p><p>Asset:<br><code>"+r.a.address+"</code></p><p>Metadata:<br><code>"+r.a.uri+"</code></p><p>Image:<br><code>"+r.m.image+"</code></p><img src='"+r.m.image+"' alt='"+r.a.name+"'>"}else c.innerHTML="<h2>"+r.n+"</h2><p>✗ Failed</p><code>"+r.addr+"</code><p>"+r.e+"</p>";grid.appendChild(c)}
+document.getElementById("status").textContent=good===6?"✓ All 6 Devnet Guardians verified.":"✓ "+good+"/6 verified. Do not mint Mainnet until all 6 are verified.";
+</script></body></html>
